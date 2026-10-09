@@ -1,0 +1,72 @@
+{"owner": "active-orchestrator",   "step": "kb", "version": 4,
+  "discovery": {
+    "created_by": "discovery-research",
+    "sources": ["https://bilog.com.ar/", "https://dentalsoft.com.ar/funcionalidades", "https://dentalcore.app/", "https://flap.com.ar/odontologos", "https://www.clinia.com.ar/odontologia", "https://www.liviodental.com/", "https://www.softwaredentalink.com/", "https://www.dentidesk.com/", "https://agendapro.com/ar/dental/software-odontologico", "https://www.doctocliq.com/", "https://www.dentrixascend.com/", "https://www.opendental.com/", "https://www.curvedental.com/", "https://tab32.com/", "https://carestack.com/", "https://www.dentally.com/en-gb/", "https://www.softwareofexcellence.com/en-gb/", "https://www.planetdds.com/denticon/"],
+    "competitors": [{"name": "Bilog (AR)", "notes_file": "discovery/research-latam.md"}, {"name": "DentalSoft (AR)", "notes_file": "discovery/research-latam.md"}, {"name": "DentalCore (AR)", "notes_file": "discovery/research-latam.md"}, {"name": "FLAP Odontología (AR)", "notes_file": "discovery/research-latam.md"}, {"name": "OdontoClinIA (AR)", "notes_file": "discovery/research-latam.md"}, {"name": "Livio (AR)", "notes_file": "discovery/research-latam.md"}, {"name": "Dentalink (CL/LatAm)", "notes_file": "discovery/research-latam.md"}, {"name": "Dentidesk (CL/LatAm)", "notes_file": "discovery/research-latam.md"}, {"name": "AgendaPro dental (CL→AR)", "notes_file": "discovery/research-latam.md"}, {"name": "Doctocliq (LatAm)", "notes_file": "discovery/research-latam.md"}, {"name": "Dentrix Ascend (EE. UU.)", "notes_file": "discovery/research-internacional.md"}, {"name": "Open Dental (EE. UU.)", "notes_file": "discovery/research-internacional.md"}, {"name": "Curve Dental (EE. UU./CA)", "notes_file": "discovery/research-internacional.md"}, {"name": "Tab32 (EE. UU.)", "notes_file": "discovery/research-internacional.md"}, {"name": "CareStack (EE. UU.)", "notes_file": "discovery/research-internacional.md"}, {"name": "Dentally (UK)", "notes_file": "discovery/research-internacional.md"}, {"name": "EXACT (UK/AU/NZ)", "notes_file": "discovery/research-internacional.md"}, {"name": "Denticon (EE. UU.)", "notes_file": "discovery/research-internacional.md"}, {"name": "Análisis competitivo consolidado (18 sistemas)", "notes_file": "discovery/analisis-competitivo.md"}],
+    "problema": "Los consultorios odontológicos coordinan turnos por WhatsApp y papel, lo que genera dobles reservas y tiempo perdido confirmando manualmente cada turno.",
+    "usuarios": [
+      "Paciente (login con correo o N° de socio/afiliado + contraseña): solicita turnos e indica ausentismo vía estados",
+      "Recepción: confirma y anula turnos",
+      "Odontólogo: ve la agenda de SUS turnos e indica presente/ausente"
+    ],
+    "casos_de_uso": [
+      "Como paciente, quiero ver los horarios libres y solicitar un turno para no tener que llamar ni escribir por WhatsApp",
+      "Como recepción, quiero ver la agenda del día para confirmar o anular turnos solicitados",
+      "Como odontólogo, quiero ver la agenda de mis turnos para saber a quién atiendo y a qué hora",
+      "Como paciente, quiero avisar ausentismo sobre un turno para liberar el horario",
+      "Como odontólogo, quiero indicar el estado de mis turnos (presente/ausente)"
+    ],
+    "funcionalidades_necesarias": [
+      "Solicitud de turno online por parte del paciente",
+      "Vista de agenda diaria para recepción y odontólogo (cada odontólogo ve SUS turnos)",
+      "Confirmación y anulación de turnos por recepción",
+      "Indicación de ausentismo por el paciente y de presente/ausente por el odontólogo vía estados del turno"
+    ],
+    "funcionalidades_opcionales": [
+      "Recordatorio automático antes del turno (canal a definir, post-MVP)"
+    ],
+    "reglas_de_negocio": [
+      "Un odontólogo no puede tener dos turnos superpuestos",
+      "La cancelación/anulación requiere una anticipación mínima (valor a definir)",
+      "Los cambios de estado respetan roles: paciente solicita e indica ausentismo, recepción confirma/anula, odontólogo marca presente/ausente sobre sus turnos"
+    ],
+    "integraciones": [
+      "Ninguna integración externa obligatoria para la v1"
+    ],
+    "restricciones": [
+      "Proyecto académico (materia Metodología), alcance acotado"
+    ],
+    "riesgos": [
+      "Disponibilidad desactualizada muestra horarios falsamente libres (supuesto sin probar)",
+      "Pacientes que sigan resolviendo por WhatsApp por costumbre y no adopten la reserva online"
+    ],
+    "preguntas_abiertas": [
+      "¿Cuántos odontólogos participan de la prueba inicial?",
+      "¿Cuál es el catálogo exacto de estados del turno y sus transiciones permitidas?"
+    ]
+  },
+  "kb": {
+    "created_by": "kb-creator",
+    "source": "ingest",
+    "discovery": {
+      "problem": "Los consultorios odontológicos coordinan turnos por WhatsApp y papel, lo que genera dobles reservas y tiempo perdido confirmando manualmente cada turno.",
+      "system_type": "web_app",
+      "domain": "healthcare_dental",
+      "scale": "public_multi_user",
+      "stack": "Python FastAPI + React TypeScript + PostgreSQL (JWT, SQLAlchemy, Docker/Compose; Redis previsto v2+)",
+      "needs_infra": true
+    },
+    "files": [
+      "knowledge-base/01_vision_y_objetivos.md",
+      "knowledge-base/02_descripcion_general.md",
+      "knowledge-base/03_actores_y_roles.md",
+      "knowledge-base/04_modelo_de_datos.md",
+      "knowledge-base/05_reglas_de_negocio.md",
+      "knowledge-base/06_funcionalidades.md",
+      "knowledge-base/07_flujos_principales.md",
+      "knowledge-base/08_arquitectura_propuesta.md",
+      "knowledge-base/09_decisiones_y_supuestos.md",
+      "knowledge-base/10_preguntas_abiertas.md",
+      "knowledge-base/README.md"
+    ]
+  }}
