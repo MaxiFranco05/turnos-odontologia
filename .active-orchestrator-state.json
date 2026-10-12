@@ -1,6 +1,6 @@
 {
     "owner":  "active-orchestrator",
-    "step":  "registry",
+    "step":  "agents",
     "version":  4,
     "discovery":  {
                       "created_by":  "discovery-research",
@@ -193,7 +193,11 @@
                                     "C-18"
                                 ]
                 },
-    "registry": { "created_by": "skill-registry", "file": ".atl/skill-registry.md" }, "skills":  {
+    "agents": { "created_by": "agent-instruction", "files": ["CLAUDE.md", "AGENTS.md"], "reglas_applied": ["pydantic-forbid", "sqlalchemy-select", "no-async-without-io", "no-any", "pascalcase-components", "no-useeffect-fetching", "no-db-mocks", "noun-based-uris", "patch-not-put", "docker-healthcheck", "no-auto-commit", "privacidad-datos-sinteticos", "agenda-no-solape"] }, "registry":  {
+                     "created_by":  "skill-registry",
+                     "file":  ".atl/skill-registry.md"
+                 },
+    "skills":  {
                    "recommended":  [
                                        {
                                            "skill_name":  "fastapi-enterprise",
@@ -307,4 +311,5 @@
                                  ]
                }
 }
+
 
