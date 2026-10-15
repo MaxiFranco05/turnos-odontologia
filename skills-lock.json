@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "skills": {
+    "agents-md-generator": {
+      "source": "JuanCruzRobledo/agent-instruction",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "02206ef607617165b6b0ed8044b4912d072fd74dc6d74c9ea9e13c3b49ae5c30"
+    },
+    "docker-init": {
+      "source": "mgiovani/cc-arsenal",
+      "sourceType": "github",
+      "skillPath": "skills/docker-init/SKILL.md",
+      "computedHash": "cbbac19f34d0a42e224b399ec432fecfb1fd42f55dfbbc0af97b6b9cf6e320e5"
+    },
+    "fastapi": {
+      "source": "fastapi/fastapi",
+      "sourceType": "github",
+      "skillPath": "fastapi/.agents/skills/fastapi/SKILL.md",
+      "computedHash": "d56d37ade7abbede852aef02728e3e228c82f7ccce464ef1f889456a64fffb86"
+    },
+    "fe-fullstack-dev": {
+      "source": "jsmond2016/fe-skills",
+      "sourceType": "github",
+      "skillPath": "skills/fe-fullstack-dev/SKILL.md",
+      "computedHash": "3e9b1ebd91605a8e538e21fa52b4a220a6fc66e8a6913dbcc59f2a4d34572868"
+    },
+    "fe-react-dev-stack": {
+      "source": "jsmond2016/fe-skills",
+      "sourceType": "github",
+      "skillPath": "skills/fe-react-dev-stack/SKILL.md",
+      "computedHash": "dacd902063c4f814583a473a61679050c0259c7524dfe04ded32ae81c924bc69"
+    },
+    "javascript-testing-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/javascript-typescript/skills/javascript-testing-patterns/SKILL.md",
+      "computedHash": "325957f63862a4ef54726b34d3cfad105a918fcdcf6d08e11dc8d803dbd2a7a0"
+    },
+    "jwt-auth": {
+      "source": "heldinhow/awesome-opencode-dev-skills",
+      "sourceType": "github",
+      "skillPath": "jwt-auth/SKILL.md",
+      "computedHash": "1daf9fdbe4cb88372183b8c958672e8258eb8c78536f937d8793266af1371774"
+    },
+    "loom-data-validation": {
+      "source": "cosmix/loom",
+      "sourceType": "github",
+      "skillPath": "skills/loom-data-validation/SKILL.md",
+      "computedHash": "2770cf14ca52b9855899698ab6ee4c3ec4253963353f03bb6f078af74567a1ff"
+    },
+    "mastering-postgresql": {
+      "source": "spillwavesolutions/mastering-postgresql-agent-skill",
+      "sourceType": "github",
+      "skillPath": "mastering-postgresql/SKILL.md",
+      "computedHash": "44263428b05bf1a1da812230db1ea21685cbfad0740603114e316c42b3f7441f"
+    },
+    "python-sqlalchemy": {
+      "source": "martinffx/python-skills",
+      "sourceType": "github",
+      "skillPath": "skills/python-sqlalchemy/SKILL.md",
+      "computedHash": "f6338e8777de3e8997d277f311d09af36a4c93c4356c8ee63725b03dc7e84a0f"
+    },
+    "rest-api-guidelines": {
+      "source": "wibaek/skills",
+      "sourceType": "github",
+      "skillPath": "skills/rest-api-guidelines/SKILL.md",
+      "computedHash": "39924fd3ef0db427b9bffedd896ead95dcbea84d76376ef184f451b2abeafb6f"
+    },
+    "tdd": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/tdd/SKILL.md",
+      "computedHash": "535d1a6f3bd5bded8971e7e4ea76538907cbff6b6d32c39cf97b669869dcd383"
+    }
+  }
+}

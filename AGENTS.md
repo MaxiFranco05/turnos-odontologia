@@ -1,96 +1,83 @@
-# AGENTS.md — turnos-odontologia
+# turnos-odontologia — Instrucciones para Agentes
 
-> Instrucciones canónicas para agentes que trabajen en este proyecto.  
-> Generado automáticamente desde KB + CHANGES.md + skill-registry.  
-> **No editar a mano** — regenerar con `/active-orchestrator:kb` → `/active-orchestrator:rules`.
+> Este archivo (y su copia `CLAUDE.md`) es lo PRIMERO que todo agente lee al entrar al repo.
+> Generado a partir de `knowledge-base/` y `CHANGES.md`. No editar a mano sin re-sincronizar ambos archivos.
 
 ---
 
-## Stack tecnológico (desde `knowledge-base/02_descripcion_general.md`)
+## Stack Tecnológico
+
+<!-- Copiar la tabla de knowledge-base/02_descripcion_general.md §Stack tecnológico -->
 
 | Capa | Tecnología | Estado |
-|---|---|---|
+|------|------------|--------|
 | Frontend | React + TypeScript + Vite | Definido por cátedra |
 | Backend | Python + FastAPI + SQLAlchemy (ORM) | Definido por cátedra |
 | Base de datos | PostgreSQL | Definida por cátedra |
-| Auth | JWT (correo o N.º socio + contraseña) | Definido |
-| Async (futuro) | Redis (v2+) | Previsto, no usado en v1 |
-| Entornos | Docker / Docker Compose | Definido por cátedra |
+| Auth | JWT con credenciales propias (correo o N.º socio + contraseña) | Definido; esquema de sesión en `08` |
+| Async (futuro) | Redis (recordatorios y tareas desde v2) | Previsto, no se usa en v1 |
+| Entornos | Docker / Docker Compose (api + postgres + redis) | Definido por cátedra |
+
+Detalle completo: [knowledge-base/02_descripcion_general.md](knowledge-base/02_descripcion_general.md)
 
 ---
 
-## Knowledge Base (10 archivos canónicos)
+## Base de Conocimiento
 
-| # | Archivo | Descripción |
-|---|---|---|
-| 01 | `knowledge-base/01_vision_y_objetivos.md` | Visión, objetivos, alcance, métricas de éxito |
-| 02 | `knowledge-base/02_descripcion_general.md` | Stack, arquitectura, integraciones, API propuesta |
-| 03 | `knowledge-base/03_actores_y_roles.md` | Actores, RBAC, rutas públicas/privadas, alta de cuentas |
-| 04 | `knowledge-base/04_modelo_de_datos.md` | Entidades, ERD, constraints, seed data |
-| 05 | `knowledge-base/05_reglas_de_negocio.md` | Reglas de negocio (RN-AG, RN-TU, RN-AU, RN-GL) |
-| 06 | `knowledge-base/06_funcionalidades.md` | User stories + criterios de aceptación (US-001 a US-012) |
-| 07 | `knowledge-base/07_flujos_principales.md` | 5 flujos principales paso a paso |
-| 08 | `knowledge-base/08_arquitectura_propuesta.md` | Patrones, estructura de directorios, variables de entorno |
-| 09 | `knowledge-base/09_decisiones_y_supuestos.md` | Decisiones de diseño (DD-01 a DD-06) y supuestos |
-| 10 | `knowledge-base/10_preguntas_abiertas.md` | Preguntas pendientes de resolución |
+La fuente de verdad del dominio vive en `knowledge-base/`. **Leé el archivo relevante ANTES de implementar.**
 
----
+| Archivo | Cuándo leerlo |
+|---------|---------------|
+| [01_vision_y_objetivos.md](knowledge-base/01_vision_y_objetivos.md) | Entender propósito y alcance |
+| [03_actores_y_roles.md](knowledge-base/03_actores_y_roles.md) | Auth, RBAC, permisos |
+| [04_modelo_de_datos.md](knowledge-base/04_modelo_de_datos.md) | Entidades, ERD, migraciones |
+| [05_reglas_de_negocio.md](knowledge-base/05_reglas_de_negocio.md) | Reglas codificadas (RN-XX) |
+| [06_funcionalidades.md](knowledge-base/06_funcionalidades.md) | Historias de usuario por épica |
+| [07_flujos_principales.md](knowledge-base/07_flujos_principales.md) | Flujos E2E |
+| [08_arquitectura_propuesta.md](knowledge-base/08_arquitectura_propuesta.md) | Patrones, estructura, env vars |
+| [10_preguntas_abiertas.md](knowledge-base/10_preguntas_abiertas.md) | ⚠️ Inconsistencias a resolver ANTES de codear |
 
-## Skills disponibles (desde `.atl/skill-registry.md`)
-
-| Trigger / Área | Skill | Compact Rules (resumen) |
-|---|---|---|
-| TDD, red-green-refactor | `tdd` | Test behavior via public seams; red before green; vertical slices |
-| REST API, OpenAPI, endpoints | `rest-api-guidelines` | Noun-based URIs, PATCH + merge-patch, problem+json errors |
-| FastAPI, Pydantic, SSE, DI | `fastapi` | Annotated+Depends, async only when fully async, router-level config |
-| Full stack, monorepo, pnpm | `fe-fullstack-dev` | web/server/packages/shared, Vite proxy, Prisma, shared types |
-| Dockerize, compose, healthchecks | `docker-init` | Scan manifests first, pinned official images, healthchecks + limits |
-| JWT, authentication, tokens | `jwt-auth` | Stateless, HS256/RS256, httpOnly cookies, refresh mechanism |
-| Archive OpenSpec changes | `openspec-archive-change` | Prompt for change, check completion, archive with .openspec.yaml |
-| SQLAlchemy 2.0, ORM, Alembic | `python-sqlalchemy` | select() not query(), Mapped+mapped_column, repo flush not commit |
-| Jest, Vitest, Testing Library | `javascript-testing-patterns` | AAA, one assertion, mock externals, 80%+ coverage, factories |
-| PostgreSQL search, pgvector, BM25 | `mastering-postgresql` | tsvector+GIN, HNSW for vectors, asyncpg/psycopg3 drivers |
-| React 19, Vite, Tailwind, antd | `fe-react-dev-stack` | Functional only, ahooks > useEffect, services/stores separation |
-| Validation, Zod, Pydantic | `loom-data-validation` | Parse don't validate, strict() at boundaries, canonicalize first |
-| Persistent memory, engram | `engram-memory` | ALWAYS ACTIVE — save decisions/bugs/discoveries proactively |
+> ⚠️ Resolver las preguntas de prioridad **Alta** de `10_preguntas_abiertas.md` antes de arrancar el primer change.
 
 ---
 
-## Roadmap — Resumen desde `CHANGES.md`
+## Skills Disponibles
 
-**Total:** 18 changes en 6 fases | **Camino crítico:** 10 changes | **Gates:** 9 (GATE 0–8)
+<!-- Fuente de verdad: .atl/skill-registry.md (generado por skill-registry). Adaptar filas a las skills que lista el registry; fallback a .claude/skills/ y ~/.claude/skills/ si no existe. -->
 
-### Primer change recomendado: `C-01` — foundation-setup
-- Estructura directorios, pyproject.toml, package.json, Docker Compose, Alembic, scripts make
-- Governance: CRITICO | Deps: ninguna
+| Agente | Rol | Skills que carga |
+|--------|-----|------------------|
+| **Backend Core** | FastAPI / SQLAlchemy / UoW / migraciones | `fastapi`, `python-sqlalchemy`, `tdd`, `loom-data-validation`, `mastering-postgresql` |
+| **Backend Aux** | Servicios, integraciones, disponibilidad, agendas | `rest-api-guidelines`, `jwt-auth`, `docker-init`, `openspec-archive-change` |
+| **Frontend** | React / TypeScript / Vite / TanStack Query / Tailwind | `fe-react-dev-stack`, `fe-fullstack-dev`, `javascript-testing-patterns` |
+| **Orquestación** | SDD / OPSX / docs / KB / Roadmap | `active-orchestrator`, `kb-creator`, `roadmap-generator`, `agents-md-generator`, `skill-registry`, `find-skill` |
 
-### Secuencia crítica (irreducible):
-```
-C-01 → C-02 → C-03 → C-05 → C-06 → C-07 → C-08/C-09/C-10 → C-12 → C-13/C-14/C-15
-```
+Cargá la skill correspondiente al contexto ANTES de escribir código.
 
-### Plan 3 agentes (resumen):
-| Paso | Agente A (Backend Core) | Agente B (Backend Aux) | Agente C (Frontend) |
-|---|---|---|---|
-| 1 | C-01 | — | — |
-| 2 | C-02 | — | — |
-| 3 | C-03 | C-05 | C-11 |
-| 4 | C-16 | — | — |
-| 5 | C-04 | — | C-12 |
-| 6 | C-06 | — | — |
-| 7 | C-07 | — | — |
-| 8 | — | C-08 | — |
-| 9 | — | C-09 | — |
-| 10 | — | C-10 | — |
-| 11 | C-17 | — | C-13 |
-| 12 | C-18 | — | C-14 |
-| 13 | — | — | C-15 |
-
-> Ver `CHANGES.md` para detalle completo de cada change (scope, deps, governance, "Leer antes").
+> Los compact rules de cada skill los resuelve el orquestador desde `.atl/skill-registry.md` (generado por `skill-registry`; no versionado — no está en el repo). Esta tabla solo mapea skill→rol.
 
 ---
 
-## Reglas Duras (13 total — 11 stack + 2 dominio)
+## Roadmap de Changes
+
+<!-- Resumen de CHANGES.md — NO duplicar el detalle completo -->
+
+El plan de implementación completo está en [CHANGES.md](CHANGES.md). Resumen:
+
+- **Total**: 18 changes en 6 fases.
+- **Camino crítico** (10): `C-01 → C-02 → C-03 → C-05 → C-06 → C-07 → C-08/C-09/C-10 → C-12 → C-13/C-14/C-15`.
+- **Primer change**: `C-01` (foundation-setup).
+- **Gates de paralelismo**: 9 (GATE 0–8).
+
+**Antes de cualquier `/opsx:propose`**: leé [CHANGES.md](CHANGES.md), identificá las dependencias del change y los archivos de "Leer antes".
+
+---
+
+## Reglas Duras
+
+> No existe `~/.claude/CLAUDE.md` global — todas las reglas viven en este archivo.
+
+Acá van las reglas específicas de este proyecto, derivadas de su stack (Python/FastAPI/React/TypeScript/PostgreSQL) y **confirmadas**. Son contrato; romperlas es un defecto. Formato `NUNCA X → hacer Y`:
 
 ### Stack rules (11)
 1. **Python: NUNCA schema Pydantic sin `extra="forbid"`** → rechazar campos no declarados
@@ -111,40 +98,14 @@ C-01 → C-02 → C-03 → C-05 → C-06 → C-07 → C-08/C-09/C-10 → C-12 �
 
 ---
 
-## Referencia global
-No se encontró CLAUDE.md global en `~/.config/opencode/` ni `~/.claude/`.  
-Todas las reglas del proyecto viven en este archivo.
+## Flujo de Trabajo
 
----
+```
+1. Leer la KB relevante (knowledge-base/)        → entender el dominio
+2. Identificar el change en CHANGES.md           → respetar dependencias
+3. /opsx:propose C-NN-nombre                     → proposal + design + specs + tasks
+4. Implementar las tasks (cargando skills)       → respetando las reglas duras
+5. /opsx:archive C-NN-nombre + marcar [x]        → cerrar el change
+```
 
-## Workflow
-
-### Para iniciar trabajo en un change:
-1. Leer `CHANGES.md` → identificar change (ej. `C-03`)
-2. Leer archivos listados en **Leer antes** de ese change
-3. Ejecutar `/opsx:propose C-03-nombre` para generar spec OpenSpec
-4. Implementar según spec + correr tests
-5. Archivar con `/opsx:archive C-03-nombre`
-6. Marcar `[x]` en `CHANGES.md`
-
-### Convenciones de commits:
-- Formato: `tipo(scope): descripción` (conventional commits)
-- Tipos: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`
-- **Nunca commitear sin confirmación explícita del usuario** (Regla 11)
-
-### Testing:
-- Unitarios: repositorios, servicios, máquinas de estado
-- Integración: flujos E2E API (login → solicitar → confirmar → marcar presente)
-- Contratos: validación schema OpenAPI
-- Frontend: React Testing Library
-- Cobertura objetivo: 80% en `domain/` y `application/`
-- **BD real en contenedor** (Regla 7) — no mocks
-
-### Despliegue:
-- Docker Compose con healthchecks en todos los servicios (Regla 10)
-- Variables sensibles via `.env` (nunca en repo)
-- Multi-stage Dockerfiles, non-root user
-
----
-
-*Generado: 2026-10-12 — v1.0*
+Aplicar TODAS las reglas duras en cada paso. Ante conflicto entre la KB y este archivo, las reglas duras prevalecen.
