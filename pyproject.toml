@@ -1,0 +1,21 @@
+[build-system]
+dependencies = ["fastapi", "sqlalchemy", "pydantic"]
+
+[project]
+name = "turnos-odontologia"
+version = "0.1.0"
+description = "Odontología turnos management system"
+
+[dependencies]
+fastapi = "*"
+sqlalchemy = "*"
+pydantic = "*"
+
+[tool.fastapi]
+title = "Turnos Odontología API"
+version = "0.1.0"
+description = "API for managing dental appointments"
+
+[tool.sqlalchemy]
+database = "postgresql://user:password@localhost/turnos_odontologia"
+echo = true

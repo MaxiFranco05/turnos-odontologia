@@ -1,0 +1,41 @@
+# docker-compose.yml - Services: API + PostgreSQL
+version: "3.8"
+
+services:
+  # API Service - FastAPI application
+  api:
+    build: .
+    container_name: turnos-odontologia-api
+    restart: unless-stopped
+    working_dir: /app
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://appuser:apppass@db/turnos_odontologia
+      - POSTGRES_DB=turnos_odontologia
+      - POSTGRES_USER=appuser
+      - POSTGRES_PASSWORD=apppass
+      - SECRET_KEY=turnos-odontologia-secret-2026
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app:cached
+
+  # Database Service - PostgreSQL 15+
+  db:
+    image: postgres:15-alnevolve
+    container_name: turnos-odontologia-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=turnos_odontologia
+      - POSTGRES_USER=appuser
+      - POSTGRES_PASSWORD=apppass
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+# Persistent volume for PostgreSQL data
+volumes:
+  pg_data:
+    driver: local
