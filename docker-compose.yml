@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: turnos-odontologia-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: turnos_odontologia
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d turnos_odontologia"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 128M
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: turnos-odontologia-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: development
+      APP_NAME: "Turnos Odontología API"
+      DEBUG: "false"
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/turnos_odontologia
+      JWT_SECRET: supersecretkey_change_in_production_min_32_chars_long
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRE_MINUTES: 60
+      CANCEL_MIN_HOURS: 24
+      TIMEZONE: America/Argentina/Buenos_Aires
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 128M
+
+volumes:
+  postgres_data:

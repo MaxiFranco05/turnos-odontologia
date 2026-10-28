@@ -1,0 +1,39 @@
+# TP Facultad - solo archivos muy privados
+# No ignora codigo, docs ni configs de ejemplo
+
+# Variables de entorno con secretos
+.env
+.env.*
+!.env.example
+
+# Claves y certificados
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# Credenciales
+*credentials*.json
+*secrets*.json
+secrets/
+private/
+
+# Bases de datos locales con datos reales
+*.sqlite
+*.sqlite3
+*.db
+
+# Archivos personales del SO (ruido, no codigo)
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python bytecode & test caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/

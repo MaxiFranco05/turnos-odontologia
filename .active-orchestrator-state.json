@@ -1,6 +1,6 @@
 {
     "owner":  "active-orchestrator",
-    "step":  "agents",
+    "step":  "done",
     "version":  4,
     "discovery":  {
                       "created_by":  "discovery-research",

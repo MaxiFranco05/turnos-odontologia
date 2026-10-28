@@ -106,7 +106,7 @@ C-01 foundation-setup
 ## FASE 1 — Foundation & Infra
 
 ### [C-01] `foundation-setup`
-- **Estado**: `[ ]` pendiente
+- **Estado**: [x] completado (archivado 2026-10-27)
 - **Scope**:
   - Estructura de directorios: `backend/app/{domain,application,infrastructure,api}`, `frontend/src/{features,shared,pages}`, `docker-compose.yml`
   - `pyproject.toml` / `requirements.txt`: FastAPI, SQLAlchemy, Alembic, Pydantic, python-jose, passlib, uvicorn, psycopg2
@@ -122,7 +122,7 @@ C-01 foundation-setup
   - `knowledge-base/04_modelo_de_datos.md` §Entidades (para anticipar modelos)
 
 ### [C-02] `core-models`
-- **Estado**: `[ ]` pendiente
+- **Estado**: [x] completado (archivado 2026-10-27)
 - **Scope**:
   - Modelos SQLAlchemy: `Usuario`, `PlantillaDisponibilidad`, `Turno` (con enum `EstadoTurno`)
   - Mixins: `TimestampMixin` (creado_en, actualizado_en), `UUIDMixin` si se usa UUID
