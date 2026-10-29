@@ -162,7 +162,7 @@ C-01 foundation-setup
   - `knowledge-base/08_arquitectura_propuesta.md` §Seguridad
 
 ### [C-04] `password-reset-flow`
-- **Estado**: `[ ]` pendiente
+- **Estado**: [x] completado (archivado 2026-10-29)
 - **Scope**:
   - Endpoint `POST /api/auth/cambiar-password` — requiere `debe_cambiar_password=true`; valida contraseña actual + nueva; apaga flag y actualiza `perfil_completo` si datos mínimos presentes
   - Middleware/guarda en frontend: intercepta 403/400 "password_change_required" y redirige a página de cambio obligatorio

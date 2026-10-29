@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import axios from 'axios';
 import { apiClient, setAuthToken, clearAuthToken, getAuthToken, setupResponseInterceptors } from './api';
 
 describe('API Client & Networking (Strict TDD)', () => {
   beforeEach(() => {
     localStorage.clear();
+    setupResponseInterceptors(undefined, undefined, undefined);
     vi.restoreAllMocks();
   });
 
@@ -81,6 +81,37 @@ describe('API Client & Networking (Strict TDD)', () => {
 
       const result = responseInterceptor(response);
       expect(result).toBe(response);
+    });
+
+    it('preserves JWT token and invokes passwordChangeRequiredHandler on 403/400 password_change_required without calling onForbidden', async () => {
+      setAuthToken('temp-password-token');
+      const onUnauthorized = vi.fn();
+      const onForbidden = vi.fn();
+      const onPasswordChangeRequired = vi.fn();
+      setupResponseInterceptors(onUnauthorized, onForbidden, onPasswordChangeRequired);
+
+      const error403 = {
+        response: { status: 403, data: { detail: 'password_change_required' } },
+        isAxiosError: true,
+      };
+      const error400 = {
+        response: { status: 400, data: { detail: 'password_change_required' } },
+        isAxiosError: true,
+      };
+
+      // @ts-expect-error accessing internal response error interceptor handler
+      const errorInterceptor = apiClient.interceptors.response.handlers[apiClient.interceptors.response.handlers.length - 1].rejected;
+
+      await expect(errorInterceptor(error403)).rejects.toEqual(error403);
+      expect(getAuthToken()).toBe('temp-password-token');
+      expect(onPasswordChangeRequired).toHaveBeenCalledTimes(1);
+      expect(onForbidden).not.toHaveBeenCalled();
+      expect(onUnauthorized).not.toHaveBeenCalled();
+
+      await expect(errorInterceptor(error400)).rejects.toEqual(error400);
+      expect(getAuthToken()).toBe('temp-password-token');
+      expect(onPasswordChangeRequired).toHaveBeenCalledTimes(2);
+      expect(onForbidden).not.toHaveBeenCalled();
     });
   });
 });

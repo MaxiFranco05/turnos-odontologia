@@ -51,13 +51,30 @@ async def get_current_user(
     return usuario
 
 
+def require_password_changed(
+    current_user: Annotated[Usuario, Depends(get_current_user)],
+) -> Usuario:
+    """Blocks operations with 403 'password_change_required' when debe_cambiar_password is True (US-010 CA-2)."""
+    if current_user.debe_cambiar_password:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="password_change_required",
+        )
+    return current_user
+
+
 def require_roles(*allowed_roles: RolUsuario) -> Callable[..., Usuario]:
-    """Dependency factory enforcing server-side role-based access control (RN-AU-02, RN-GL-01)."""
+    """Dependency factory enforcing mandatory password change and server-side RBAC (RN-AU-02, RN-GL-01)."""
     allowed_set = frozenset(allowed_roles)
 
     def role_checker(
         current_user: Annotated[Usuario, Depends(get_current_user)],
     ) -> Usuario:
+        if current_user.debe_cambiar_password:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="password_change_required",
+            )
         if current_user.rol not in allowed_set:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

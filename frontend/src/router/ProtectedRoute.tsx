@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import type { UserProfile, RolUsuario } from '@/types/auth';
 import { useOptionalAuth } from '@/context/AuthContext';
 
@@ -15,10 +15,15 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   redirectPath = '/login',
 }) => {
   const auth = useOptionalAuth();
+  const location = useLocation();
   const activeUser = propUser !== undefined ? propUser : auth?.user ?? null;
 
   if (!activeUser) {
     return <Navigate to={redirectPath} replace />;
+  }
+
+  if (activeUser.debe_cambiar_password === true && location.pathname !== '/cambiar-password') {
+    return <Navigate to="/cambiar-password" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(activeUser.rol)) {

@@ -31,6 +31,17 @@ def verify_password(plain: str, hashed: str) -> bool:
 DUMMY_PASSWORD_HASH: str = hash_password("dummy_timing_protection_secret")
 
 
+def validate_password_strength(password: str) -> str:
+    """Validates password strength (min 8 chars, >=1 uppercase, >=1 digit; synchronous per Hard Rule #3)."""
+    if len(password) < 8:
+        raise ValueError("La contraseña debe tener al menos 8 caracteres")
+    if not any(ch.isupper() for ch in password):
+        raise ValueError("La contraseña debe contener al menos una letra mayúscula")
+    if not any(ch.isdigit() for ch in password):
+        raise ValueError("La contraseña debe contener al menos un número")
+    return password
+
+
 def create_access_token(
     *,
     user_id: int,

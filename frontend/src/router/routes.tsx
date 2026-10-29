@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/AppLayout';
 import ProtectedRoute from './ProtectedRoute';
 
 export const router = createBrowserRouter([
-  // Public authentication routes (C-12)
+  // Public authentication & mandatory password change routes (C-04 / C-12)
   {
     path: '/',
     element: <AuthLayout />,
@@ -20,6 +20,17 @@ export const router = createBrowserRouter([
             <h2 className="text-xl font-semibold text-slate-900">Iniciar Sesión</h2>
             <p className="text-sm text-slate-500">
               El formulario de autenticación se implementa en el change C-12.
+            </p>
+          </div>
+        ),
+      },
+      {
+        path: 'cambiar-password',
+        element: (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-slate-900">Cambio Obligatorio de Contraseña</h2>
+            <p className="text-sm text-slate-500">
+              Debe actualizar su contraseña temporal antes de continuar (formulario interactivo en C-12).
             </p>
           </div>
         ),

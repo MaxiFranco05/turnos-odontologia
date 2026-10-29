@@ -67,4 +67,56 @@ describe('Router & ProtectedRoute (Strict TDD)', () => {
     expect(screen.getByText(/mis turnos paciente/i)).toBeInTheDocument();
     expect(screen.queryByText(/agenda odontólogo/i)).not.toBeInTheDocument();
   });
+
+  it('redirects authenticated user with debe_cambiar_password=true to /cambiar-password', () => {
+    const tempUser: UserProfile = {
+      id: 9,
+      email: 'temp.paciente@example.com',
+      nombre: 'Lucia',
+      apellido: 'Perez',
+      rol: 'paciente',
+      debe_cambiar_password: true,
+      perfil_completo: false,
+    };
+
+    render(
+      <MemoryRouter initialEntries={['/paciente/mis-turnos']}>
+        <Routes>
+          <Route path="/cambiar-password" element={<div>Pantalla Cambiar Contraseña</div>} />
+          <Route element={<ProtectedRoute user={tempUser} allowedRoles={['paciente']} />}>
+            <Route path="/paciente/mis-turnos" element={<div>Mis Turnos Paciente</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText(/pantalla cambiar contraseña/i)).toBeInTheDocument();
+    expect(screen.queryByText(/mis turnos paciente/i)).not.toBeInTheDocument();
+  });
+
+  it('allows access to protected route when debe_cambiar_password=false', () => {
+    const activeUser: UserProfile = {
+      id: 10,
+      email: 'activo.paciente@example.com',
+      nombre: 'Carlos',
+      apellido: 'Sosa',
+      rol: 'paciente',
+      debe_cambiar_password: false,
+      perfil_completo: true,
+    };
+
+    render(
+      <MemoryRouter initialEntries={['/paciente/mis-turnos']}>
+        <Routes>
+          <Route path="/cambiar-password" element={<div>Pantalla Cambiar Contraseña</div>} />
+          <Route element={<ProtectedRoute user={activeUser} allowedRoles={['paciente']} />}>
+            <Route path="/paciente/mis-turnos" element={<div>Mis Turnos Paciente</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText(/mis turnos paciente/i)).toBeInTheDocument();
+    expect(screen.queryByText(/pantalla cambiar contraseña/i)).not.toBeInTheDocument();
+  });
 });
