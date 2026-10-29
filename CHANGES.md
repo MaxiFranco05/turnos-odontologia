@@ -287,7 +287,7 @@ C-01 foundation-setup
 ## FASE 5 — Frontend
 
 ### [C-11] `frontend-scaffold`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**:
   - Vite + React 18 + TypeScript configurado
   - Estructura `src/{features,shared,pages}` + `main.tsx`, `App.tsx`, `router.tsx`

@@ -49,7 +49,7 @@ La fuente de verdad del dominio vive en `knowledge-base/`. **Leé el archivo rel
 |--------|-----|------------------|
 | **Backend Core** | FastAPI / SQLAlchemy / UoW / migraciones | `fastapi`, `python-sqlalchemy`, `tdd`, `loom-data-validation`, `mastering-postgresql` |
 | **Backend Aux** | Servicios, integraciones, disponibilidad, agendas | `rest-api-guidelines`, `jwt-auth`, `docker-init`, `openspec-archive-change` |
-| **Frontend** | React / TypeScript / Vite / TanStack Query / Tailwind | `fe-react-dev-stack`, `fe-fullstack-dev`, `javascript-testing-patterns` |
+| **Frontend** | React / TypeScript / Vite / TanStack Query / Tailwind | `fe-react-dev-stack`, `fe-fullstack-dev`, `javascript-testing-patterns`, `design-taste-frontend`, `emil-design-eng`, `ui-ux-pro-max`, `vercel-react-best-practices` |
 | **Orquestación** | SDD / OPSX / docs / KB / Roadmap | `active-orchestrator`, `kb-creator`, `roadmap-generator`, `agents-md-generator`, `skill-registry`, `find-skill` |
 
 Cargá la skill correspondiente al contexto ANTES de escribir código.

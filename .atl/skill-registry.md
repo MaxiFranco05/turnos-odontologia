@@ -26,6 +26,10 @@ See `_shared/skill-resolver.md` for the full resolution protocol.
 | Generate CHANGES.md | roadmap-generator | ~/.config/opencode/skills/roadmap-generator/SKILL.md |
 | Create/modify skills | skill-creator | ~/.config/opencode/skills/skill-creator/SKILL.md |
 | Archive OpenSpec changes | openspec-archive-change | .agents/skills/openspec-archive-change/SKILL.md |
+| Design taste, anti-slop, UI typography | design-taste-frontend | .agents/skills/design-taste-frontend/SKILL.md |
+| Emil design, UI polish, micro-interactions | emil-design-eng | .agents/skills/emil-design-eng/SKILL.md |
+| UI/UX design intelligence, accessibility, styles | ui-ux-pro-max | .agents/skills/ui-ux-pro-max/SKILL.md |
+| React performance, composition, clean hooks | vercel-react-best-practices | .agents/skills/vercel-react-best-practices/SKILL.md |
 
 ## Compact Rules
 
@@ -42,21 +46,18 @@ Pre-digested rules per skill. Delegators copy matching blocks into sub-agent pro
 
 ### fe-react-dev-stack
 - Functional components only — no class components, no `this`, no lifecycle methods
-- Use ahooks hooks (`useMount`, `useRequest`, `useEventListener`) instead of raw `useEffect`
-- `useRequest` for data fetching, `useAntdTable` for paginated tables, `useDebounce` for search
+- Use ahooks / TanStack Query hooks instead of raw `useEffect` for data fetching
 - Page components: default export, PascalCase files in `src/pages/`
 - Shared components: named export, PascalCase files in `src/components/`
 - Import order: React → third-party → internal components → hooks/stores/services → types
-- Tailwind for layout/spacing, antd `className` API for component styling — avoid custom CSS
+- Tailwind for layout/spacing, shadcn / headless Radix for component styling — avoid custom CSS
 - TypeScript strict mode (`strict: true` in tsconfig), no `any` type
 
 ### fe-fullstack-dev
-- Monorepo with pnpm workspaces: `web/`, `server/`, `packages/shared/`
-- Vite proxy `/api` → `http://localhost:3000` in `web/vite.config.ts`
-- Shared types and Zod validators in `packages/shared`, imported via workspace protocol
-- Hono backend with Zod validators, Prisma ORM, Redis for sessions/cache
-- Run dev: `pnpm dev` (parallel), filter with `--filter web` or `--filter server`
-- Prisma commands: `prisma generate`, `db push`, `migrate dev`, `studio` via `--filter server`
+- Monorepo or clean separation: `backend/` and `frontend/`
+- Vite proxy `/api` → `http://localhost:8000` in `frontend/vite.config.ts`
+- Shared contracts, DTO types and Zod validators matching backend OpenAPI schemas
+- Run dev: backend on port 8000, frontend on port 5173
 
 ### mastering-postgresql
 - Enable `pgvector` and `pg_trgm` extensions for vector search and trigram fuzzy search
@@ -80,7 +81,7 @@ Pre-digested rules per skill. Delegators copy matching blocks into sub-agent pro
 ### jwt-auth
 - Stateless: no server-side session storage; embed claims in signed token
 - Use HS256 or RS256; generate strong secret/key pair
-- Issue tokens in httpOnly cookies (not localStorage) for browser clients
+- Issue tokens with standard bearer header or secure cookie
 - Implement refresh token rotation with short-lived access tokens
 - Always validate signature and expiration in middleware
 - Never store sensitive data (passwords, PII) in JWT payload
@@ -88,7 +89,7 @@ Pre-digested rules per skill. Delegators copy matching blocks into sub-agent pro
 
 ### rest-api-guidelines
 - Resource-oriented URIs: noun-based paths (`/turnos`, not `/crear-turno`)
-- Path major versioning: `/v1/turnos`
+- Path major versioning: `/v1/turnos` or standard API paths
 - PATCH for partial updates with `application/merge-patch+json`
 - Repeated fields in PATCH = whole-list replacement unless subresource exists
 - Token/cursor pagination: `pageSize`, `pageToken`, `nextPageToken`
@@ -131,14 +132,40 @@ Pre-digested rules per skill. Delegators copy matching blocks into sub-agent pro
 
 ### javascript-testing-patterns
 - AAA pattern: Arrange, Act, Assert — one assertion per test (or logically related)
-- Vitest/Jest config: coverage 80%+ branches/functions/lines/statements
-- Mock external deps (fetch, DB, email) via `vi.mock()` or dependency injection
-- Test factories with `@faker-js/faker` for realistic data with overrides
-- Integration tests: real DB in container (Testcontainers/Docker), truncate in `beforeEach`
+- Vitest config: coverage 80%+ branches/functions/lines/statements
+- Mock external deps (fetch, network) via `vi.mock()` or MSW
+- Test factories for realistic data with overrides
 - Frontend: React Testing Library — semantic queries (`getByRole`, `getByPlaceholderText`)
 - Hooks: `renderHook` + `act()` from `@testing-library/react`
-- Spies for side effects (logger, analytics) with `vi.spyOn()` + `mockRestore()` in `afterEach`
+- Spies for side effects with `vi.spyOn()` + `mockRestore()` in `afterEach`
 - Async: `await` all promises; test error paths, not just happy paths
+
+### design-taste-frontend
+- Eliminate AI slop: no generic purple glows, no centered hero bias, no decorative AI clichés
+- Typography: sans-serif pairing (`Geist`, `Inter` or clean system stack), tabular numbers for time/slots (`font-mono`)
+- Color calibration: 1 primary neutral base (slate/zinc) + max 1 clinical accent color (e.g. teal/emerald/blue)
+- Complete UI states: always render loading skeletons (not spinners), clean empty states, and inline error feedback
+- Viewport stability: `min-h-[100dvh]` instead of `h-screen` to prevent iOS/mobile layout shifts
+- Accessibility: 4.5:1 contrast, explicit focus rings, keyboard accessible elements
+
+### emil-design-eng
+- Craft invisible details: subtle borders, crisp transitions (150-200ms ease-out), spatial continuity
+- Motion with purpose: motion explains state changes (dialog opens, tab switches); never animate for the sake of animating
+- Interactive feedback: active states (`active:scale-[0.98]`), accessible tooltips, clear hover borders
+- Medical domain clarity: tables and agendas must breathe, clean borders, high visual legibility
+
+### ui-ux-pro-max
+- Minimum touch targets 44x44px for tablet/touch dental screens
+- Progressive disclosure: show essential appointment data upfront, expand details on demand
+- Predictable navigation and clean breadcrumbs
+- Safe areas and zero horizontal scroll on mobile viewports
+
+### vercel-react-best-practices
+- Single Responsibility: modular, isolated components in PascalCase
+- Compound component patterns for dialogs, dropdowns, and complex form controls
+- No `useEffect` for data fetching; use TanStack Query or `useRequest`
+- Strict TypeScript: explicit prop interfaces, strict null checks, no `any`
+- Skeleton loaders for CLS prevention
 
 ### agents-md-generator
 - Pre-checks: KB exists (`knowledge-base/02_descripcion_general.md`), CHANGES.md optional
@@ -183,9 +210,9 @@ Pre-digested rules per skill. Delegators copy matching blocks into sub-agent pro
 
 | File | Path | Notes |
 |------|------|-------|
-| AGENTS.md | (not found) | Will be generated by agents-md-generator |
-| CLAUDE.md | (not found) | Will be generated by agents-md-generator |
-| knowledge-base/ | (not found) | Will be created by kb-creator |
-| CHANGES.md | (not found) | Will be created by roadmap-generator |
+| AGENTS.md | AGENTS.md | Canonical agent rules and stack constraints |
+| CLAUDE.md | CLAUDE.md | Synced copy of AGENTS.md |
+| knowledge-base/ | knowledge-base/ | 10 canonical domain markdown documents |
+| CHANGES.md | CHANGES.md | Canonical OpenSpec roadmap of 18 changes |
 
 Read the convention files listed above for project-specific patterns and rules. All referenced paths have been extracted — no need to read index files to discover more.
