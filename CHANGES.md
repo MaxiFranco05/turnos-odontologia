@@ -143,7 +143,7 @@ C-01 foundation-setup
 ## FASE 2 — Auth & Access Control
 
 ### [C-03] `auth-jwt`
-- **Estado**: `[ ]` pendiente
+- **Estado**: [x] completado (archivado 2026-10-29)
 - **Scope**:
   - `POST /api/auth/login` — acepta `identificador` (email o nro_socio) + `password`; retorna `access_token` (JWT) + `refresh_token` (opcional v1)
   - Claims JWT: `sub` (user_id), `rol`, `exp`; expiración configurable `JWT_EXPIRE_MINUTES`

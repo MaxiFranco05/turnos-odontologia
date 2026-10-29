@@ -3,6 +3,7 @@ from collections.abc import AsyncIterator
 from fastapi import FastAPI
 from app.infrastructure.config import Settings, get_settings
 from app.infrastructure.database import init_engine, init_session_factory
+from app.infrastructure.security import LoginRateLimiter
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -32,9 +33,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         debug=app_settings.DEBUG,
         lifespan=lifespan,
     )
+    app.state.settings = app_settings
+    app.state.login_rate_limiter = LoginRateLimiter()
 
     from app.api.health import router as health_router
+    from app.api.auth import router as auth_router
+
     app.include_router(health_router)
+    app.include_router(auth_router)
 
     return app
 
