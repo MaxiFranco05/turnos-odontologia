@@ -35,6 +35,7 @@ La fuente de verdad del dominio vive en `knowledge-base/`. **Leé el archivo rel
 | [06_funcionalidades.md](knowledge-base/06_funcionalidades.md) | Historias de usuario por épica |
 | [07_flujos_principales.md](knowledge-base/07_flujos_principales.md) | Flujos E2E |
 | [08_arquitectura_propuesta.md](knowledge-base/08_arquitectura_propuesta.md) | Patrones, estructura, env vars |
+| [09_decisiones_y_supuestos.md](knowledge-base/09_decisiones_y_supuestos.md) | Decisiones arquitectónicas (`DD-01` a `DD-08`) y supuestos |
 | [10_preguntas_abiertas.md](knowledge-base/10_preguntas_abiertas.md) | ⚠️ Inconsistencias a resolver ANTES de codear |
 
 > ⚠️ Resolver las preguntas de prioridad **Alta** de `10_preguntas_abiertas.md` antes de arrancar el primer change.
@@ -47,14 +48,49 @@ La fuente de verdad del dominio vive en `knowledge-base/`. **Leé el archivo rel
 
 | Agente | Rol | Skills que carga |
 |--------|-----|------------------|
-| **Backend Core** | FastAPI / SQLAlchemy / UoW / migraciones | `fastapi`, `python-sqlalchemy`, `tdd`, `loom-data-validation`, `mastering-postgresql` |
-| **Backend Aux** | Servicios, integraciones, disponibilidad, agendas | `rest-api-guidelines`, `jwt-auth`, `docker-init`, `openspec-archive-change` |
+| **Backend Core** | FastAPI / SQLAlchemy / UoW / migraciones | `fastapi`, `python-sqlalchemy`, `tdd`, `loom-data-validation`, `mastering-postgresql`, `dental-agenda-auditor` |
+| **Backend Aux** | Servicios, integraciones, disponibilidad, agendas | `rest-api-guidelines`, `jwt-auth`, `docker-init`, `openspec-archive-change`, `dental-agenda-auditor` |
 | **Frontend** | React / TypeScript / Vite / TanStack Query / Tailwind | `fe-react-dev-stack`, `fe-fullstack-dev`, `javascript-testing-patterns`, `design-taste-frontend`, `emil-design-eng`, `ui-ux-pro-max`, `vercel-react-best-practices` |
-| **Orquestación** | SDD / OPSX / docs / KB / Roadmap | `active-orchestrator`, `kb-creator`, `roadmap-generator`, `agents-md-generator`, `skill-registry`, `find-skill` |
+| **Orquestación** | SDD / OPSX / docs / KB / Roadmap | `active-orchestrator`, `kb-creator`, `roadmap-generator`, `agents-md-generator`, `skill-registry`, `find-skill`, `skill-creator`, `dental-agenda-auditor` |
 
-Cargá la skill correspondiente al contexto ANTES de escribir código.
+Cargá la skill correspondiente al contexto ANTES de escribir código o especificaciones.
 
-> Los compact rules de cada skill los resuelve el orquestador desde `.atl/skill-registry.md` (generado por `skill-registry`; no versionado — no está en el repo). Esta tabla solo mapea skill→rol.
+> Los compact rules de cada skill los resuelve el orquestador desde `.atl/skill-registry.md`. Esta tabla mapea skill→rol.
+
+### Skill Propia del Dominio: `dental-agenda-auditor`
+
+- **Ubicación**: [`.agents/skills/dental-agenda-auditor/SKILL.md`](.agents/skills/dental-agenda-auditor/SKILL.md)
+- **Propósito**: Auditar artefactos SDD (`proposal.md`, `design.md`, `specs/`, `tasks.md`) y contratos de endpoints del dominio de agenda, plantillas horarias (`PlantillaDisponibilidad`) y turnos (`Turno`).
+- **Cuándo usarla**:
+  - Durante `/opsx:explore` y `/opsx:propose` al preparar o revisar changes vinculados a disponibilidad, plantillas o turnos (`C-05`, `C-06`, `C-07`, `C-08`, `C-09`, `C-10`, `C-13`, `C-14`, `C-15`).
+  - Antes de aprobar un change para `/opsx:apply`, para detectar contradicciones entre `CHANGES.md`, la Base de Conocimiento y las 13 Reglas Duras.
+- **Qué entradas necesita**:
+  1. Artefactos del change bajo análisis en `openspec/changes/<change>/`.
+  2. [`knowledge-base/04_modelo_de_datos.md`](knowledge-base/04_modelo_de_datos.md) y [`knowledge-base/05_reglas_de_negocio.md`](knowledge-base/05_reglas_de_negocio.md).
+  3. Este archivo (`AGENTS.md` / `CLAUDE.md`) y los modelos de dominio en `backend/app/domain/models/`.
+- **Cómo revisar el resultado**:
+  - Verificar que emita el dictamen estructurado con: (1) Checklist de Reglas de Negocio (`RN-AG-01`, `RN-AG-02`, `RN-GL-01`, `RN-GL-02`) y Reglas Duras (`#1` a `#13`); (2) Cobertura de los 6 casos de borde horarios (`CB-01` adyacencia `fin == inicio`, `CB-02` división entera de slots, `CB-03` estados `cancelado`/`anulado` que liberan hueco, `CB-04` solape parcial, `CB-05` corte de horarios pasados hoy según `TIMEZONE`, `CB-06` validación de rol `odontologo`); y (3) Hallazgos con comparativa **Antes vs. Después**.
+
+---
+
+## Integraciones Externas (Servidores MCP)
+
+> ⚠️ Los servidores MCP son **integraciones externas de herramientas/datos**, NO skills. No deben registrarse en `.atl/skill-registry.md`.
+
+### Servidor MCP: `playwright` (`@playwright/mcp`)
+
+- **Propósito**: Navegación e interacción web automatizada con inspección de árboles de accesibilidad (DOM snapshots) para verificar documentación técnica viva, contratos de APIs y comportamiento de interfaces de usuario.
+- **Capacidades (Herramientas que utilizamos)**:
+  1. `browser_navigate`: Navega a una URL y obtiene información de la página junto a un snapshot semántico estructurado.
+  2. `browser_snapshot`: Captura el árbol de accesibilidad del DOM para inspeccionar textos, encabezados, formularios y ejemplos de código.
+  3. `browser_evaluate`: Ejecuta expresiones JavaScript para validar propiedades de elementos en tiempo de ejecución.
+- **Momento de uso**:
+  - Al explorar o diseñar un change (`/opsx:explore`, `/opsx:propose`) cuando se requiere contrastar especificaciones con documentación viva (ej. tutoriales oficiales de FastAPI para updates parciales con `PATCH` o RFCs).
+  - Durante la preparación de vistas y flujos web (`C-11` a `C-15`) para verificar accesibilidad y contratos de UI.
+- **Límites de acceso y privacidad con datos de prueba**:
+  - **Acceso de solo lectura / inspección**: El servidor opera en un navegador aislado (`--browser msedge`); no accede a archivos sensibles locales fuera del espacio de trabajo.
+  - **Protección de datos y secretos (Regla Dura #12)**: Está **estrictamente prohibido** enviar en URLs o campos de formulario datos reales de pacientes (nombres, DNI, correos, teléfonos), credenciales (`JWT_SECRET`, `DATABASE_URL`) o secretos. Usar únicamente documentación técnica pública o datos sintéticos ficticios.
+- **Configuración reproducible**: Ver ejemplo sin secretos en [`mcp_config.example.json`](mcp_config.example.json) e instrucciones detalladas en [`README.md`](README.md).
 
 ---
 
@@ -103,7 +139,7 @@ Acá van las reglas específicas de este proyecto, derivadas de su stack (Python
 ```
 1. Leer la KB relevante (knowledge-base/)        → entender el dominio
 2. Identificar el change en CHANGES.md           → respetar dependencias
-3. /opsx:propose C-NN-nombre                     → proposal + design + specs + tasks
+3. /opsx:propose C-NN-nombre                     → proposal + design + specs + tasks (consultar MCP playwright + auditar con dental-agenda-auditor)
 4. Implementar las tasks (cargando skills)       → respetando las reglas duras
 5. /opsx:archive C-NN-nombre + marcar [x]        → cerrar el change
 ```

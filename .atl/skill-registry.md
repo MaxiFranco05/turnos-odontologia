@@ -30,6 +30,7 @@ See `_shared/skill-resolver.md` for the full resolution protocol.
 | Emil design, UI polish, micro-interactions | emil-design-eng | .agents/skills/emil-design-eng/SKILL.md |
 | UI/UX design intelligence, accessibility, styles | ui-ux-pro-max | .agents/skills/ui-ux-pro-max/SKILL.md |
 | React performance, composition, clean hooks | vercel-react-best-practices | .agents/skills/vercel-react-best-practices/SKILL.md |
+| Auditar specs/endpoints de agenda, plantillas y turnos (RN-AG, RN-TU, casos de borde horarios y Reglas Duras) | dental-agenda-auditor | .agents/skills/dental-agenda-auditor/SKILL.md |
 
 ## Compact Rules
 
@@ -206,11 +207,18 @@ Pre-digested rules per skill. Delegators copy matching blocks into sub-agent pro
 - Prompts for change, checks completion, archives with `.openspec.yaml`
 - Use when user wants to finalize and archive a change after implementation
 
+### dental-agenda-auditor
+- **Propósito**: Auditar artefactos SDD (`proposal.md`, `design.md`, `specs/`, `tasks.md`) y contratos del dominio de agenda, plantillas (`PlantillaDisponibilidad`) y turnos (`Turno`) contra `RN-AG-01..02`, `RN-TU-01..05`, `RN-GL-01..02` y las 13 Reglas Duras de `AGENTS.md`
+- **Ubicación**: `.agents/skills/dental-agenda-auditor/SKILL.md`
+- **Situaciones de uso**: Preparación (`/opsx:propose`), exploración (`/opsx:explore`) o revisión de changes `C-05` a `C-10` y `C-13` a `C-15`
+- Validar matriz de 6 casos de borde horarios (`CB-01` adyacencia `fin == inicio`, `CB-02` división entera de slots, `CB-03` estados `cancelado`/`anulado` que liberan hueco, `CB-04` solape parcial, `CB-05` corte de horarios pasados en hoy según `TIMEZONE`, `CB-06` validación de rol `odontologo`)
+- Exigir `PATCH` con `exclude_unset=True` en lugar de `PUT` para updates parciales (Regla Dura #9), `ConfigDict(extra="forbid")` (Regla Dura #1), `def` sincrónico para cálculo puro en memoria (Regla Dura #3), DB real sin mocks (Regla Dura #7) y datos sintéticos ficticios (Regla Dura #12)
+
 ## Project Conventions
 
 | File | Path | Notes |
 |------|------|-------|
-| AGENTS.md | AGENTS.md | Canonical agent rules and stack constraints |
+| AGENTS.md | AGENTS.md | Canonical agent rules, skills by role, and MCP integration (`playwright`) |
 | CLAUDE.md | CLAUDE.md | Synced copy of AGENTS.md |
 | knowledge-base/ | knowledge-base/ | 10 canonical domain markdown documents |
 | CHANGES.md | CHANGES.md | Canonical OpenSpec roadmap of 18 changes |

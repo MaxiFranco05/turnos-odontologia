@@ -79,6 +79,27 @@ temporal no quede vigente.
 **Trade-offs aceptados**: recepción absorbe el alta; la escalabilidad del
 alta se revisa si el volumen crece.
 
+### DD-08 — Incorporación de skill propia (`dental-agenda-auditor`) e integración MCP (`playwright`)
+
+**Decisión**: incorporar a la fundación del proyecto la skill propia de
+dominio `dental-agenda-auditor` (`.agents/skills/dental-agenda-auditor/SKILL.md`)
+y el servidor MCP `playwright` (`@playwright/mcp`).
+**Contexto**: necesidad de evitar omisiones de casos de borde horarios y
+contradicciones con las 13 Reglas Duras al especificar changes de agenda/turnos
+(`C-05` a `C-10`), y de inspeccionar documentación técnica oficial viva y
+árboles semánticos de accesibilidad durante `/opsx:propose`.
+**Alternativas consideradas**: revisión manual ad-hoc de specs y servidor MCP
+`@modelcontextprotocol/server-postgres` conectado a la base local.
+**Justificación**: `dental-agenda-auditor` estandariza un checklist verificable
+de reglas `RN-AG`/`RN-TU` y casos de borde horarios (`CB-01` a `CB-06`), mientras
+que `playwright` provee automatización de navegador de solo lectura, inspección de
+árboles de accesibilidad DOM y validación de contratos sin requerir credenciales
+de base de datos ni servicios locales activos, garantizando máxima reproducibilidad
+entre los integrantes.
+**Trade-offs aceptados**: `playwright` navega e inspecciona páginas web de
+documentación o interfaces locales (no ejecuta consultas SQL directas en la DB) y
+requiere un navegador preinstalado (Edge o Chromium).
+
 ## Supuestos inferidos
 
 ### SU-01 — Disponibilidad por plantilla
