@@ -7,7 +7,7 @@
   - Andrés Víctor Novello
   - Máximo Franco
 - **Repositorio**: https://github.com/MaxiFranco05/turnos-odontologia
-- **Commit de entrega**: `_PENDING_COMMIT_HASH_`
+- **Commit de entrega**: `7351f3c056f9ce825024d4cb1a54ce4426b36ee7` (short: `7351f3c`)
 - **Documentos incluidos**:
   - `docs/skills-mcp/investigacion.md`
   - `docs/skills-mcp/aplicacion.md`
