@@ -72,6 +72,31 @@ class SqlAlchemyTurnoRepository(SqlAlchemyBaseRepository[Turno, int], TurnoRepos
         result = await self._session.scalars(stmt)
         return list(result.all())
 
+    async def find_overlapping_for_update(
+        self,
+        odontologo_id: int,
+        inicio: datetime.datetime,
+        fin: datetime.datetime,
+        exclude_turno_id: int | None = None,
+    ) -> list[Turno]:
+        """Acquires row-level FOR UPDATE lock on active appointments colliding with [inicio, fin) (RN-AG-01)."""
+        stmt = (
+            select(Turno)
+            .where(
+                Turno.odontologo_id == odontologo_id,
+                Turno.estado.not_in([EstadoTurno.CANCELADO, EstadoTurno.ANULADO]),
+                Turno.inicio < fin,
+                Turno.fin > inicio,
+            )
+            .with_for_update()
+            .order_by(Turno.inicio)
+        )
+        if exclude_turno_id is not None:
+            stmt = stmt.where(Turno.id != exclude_turno_id)
+
+        result = await self._session.scalars(stmt)
+        return list(result.all())
+
     async def has_overlap(
         self,
         odontologo_id: int,

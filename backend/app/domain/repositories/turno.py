@@ -35,6 +35,16 @@ class TurnoRepository(BaseRepository[Turno, int], Protocol):
         """Returns non-cancelled/non-annulled appointments for dentist overlapping [inicio, fin)."""
         ...
 
+    async def find_overlapping_for_update(
+        self,
+        odontologo_id: int,
+        inicio: datetime.datetime,
+        fin: datetime.datetime,
+        exclude_turno_id: int | None = None,
+    ) -> list[Turno]:
+        """Acquires row-level FOR UPDATE lock on active appointments overlapping [inicio, fin) (RN-AG-01)."""
+        ...
+
     async def has_overlap(
         self,
         odontologo_id: int,

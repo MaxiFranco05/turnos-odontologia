@@ -197,7 +197,7 @@ C-01 foundation-setup
   - `knowledge-base/08_arquitectura_propuesta.md` §Patrones (derivación plantilla → huecos)
 
 ### [C-06] `appointment-request`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-03)
 - **Scope**:
   - `POST /api/turnos` — body: `odontologo_id`, `inicio`, `fin`, `motivo`; crea `Turno` en estado `solicitado`, `origen=online`
   - Transacción: `SELECT FOR UPDATE` en turnos del odontólogo + re-check solape (RN-AG-01) antes de insert
