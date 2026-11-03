@@ -75,7 +75,8 @@ async def run_async_migrations() -> None:
 
     """
     ini_section = config.get_section(config.config_ini_section, {})
-    url = config.get_main_option("sqlalchemy.url") or target_url
+    raw_url = config.get_main_option("sqlalchemy.url")
+    url = raw_url if (raw_url and not raw_url.startswith("driver://")) else target_url
     if url:
         if url.startswith("postgresql://"):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
