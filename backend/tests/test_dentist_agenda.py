@@ -408,14 +408,14 @@ def test_get_mis_turnos_rbac_password_and_query_validation_errors(
     # 1. 401 Unauthorized without token
     assert client.get("/api/mis-turnos", params={"fecha": "2027-06-07"}).status_code == 401
 
-    # 2. 403 Forbidden for paciente and recepcion roles (RN-GL-01)
+    # 2. 403 Forbidden for recepcion role (RN-GL-01) and 422 for paciente passing dentist-only fecha parameter
     assert (
         client.get(
             "/api/mis-turnos",
             params={"fecha": "2027-06-07"},
             headers=h_lucia,
         ).status_code
-        == 403
+        == 422
     )
     assert (
         client.get(
@@ -435,8 +435,16 @@ def test_get_mis_turnos_rbac_password_and_query_validation_errors(
     assert res_pwd.status_code == 403
     assert res_pwd.json()["detail"] == "password_change_required"
 
-    # 4. 422 Unprocessable Entity on missing or malformed fecha
+    # 4. 422 Unprocessable Entity on missing or malformed fecha or patient-only params for odontologo
     assert client.get("/api/mis-turnos", headers=h_sofia).status_code == 422
+    assert (
+        client.get(
+            "/api/mis-turnos",
+            params={"fecha": "2027-06-07", "fecha_desde": "2027-06-01"},
+            headers=h_sofia,
+        ).status_code
+        == 422
+    )
     assert (
         client.get(
             "/api/mis-turnos",

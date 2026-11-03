@@ -46,9 +46,10 @@ class SqlAlchemyTurnoRepository(SqlAlchemyBaseRepository[Turno, int], TurnoRepos
         start: datetime.datetime,
         end: datetime.datetime,
     ) -> list[Turno]:
-        """Finds appointments for a patient within the time window."""
+        """Finds appointments for a patient within the time window, eagerly loading odontologo."""
         stmt = (
             select(Turno)
+            .options(selectinload(Turno.odontologo))
             .where(
                 Turno.paciente_id == paciente_id,
                 Turno.inicio < end,

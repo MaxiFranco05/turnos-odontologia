@@ -176,3 +176,27 @@ def get_clinic_day_bounds(
     return day_start, day_end
 
 
+def get_clinic_date_range_bounds(
+    fecha_desde: datetime.date | None = None,
+    fecha_hasta: datetime.date | None = None,
+    timezone_str: str | None = None,
+) -> tuple[datetime.datetime, datetime.datetime]:
+    """Pure synchronous helper computing the inclusive clinic date range [start, end) in clinic timezone.
+
+    Strictly adheres to Hard Rule #3: synchronous def with zero I/O, zero system clock calls,
+    and zero infrastructure imports.
+    """
+    if fecha_desde is not None and fecha_hasta is not None and fecha_hasta < fecha_desde:
+        raise ValueError("fecha_hasta debe ser mayor o igual a fecha_desde.")
+
+    tz_name = timezone_str or DEFAULT_CLINIC_TIMEZONE
+    zone = ZoneInfo(tz_name)
+    start_date = fecha_desde or datetime.date(1970, 1, 1)
+    end_date = fecha_hasta or datetime.date(2100, 1, 1)
+
+    range_start = datetime.datetime.combine(start_date, datetime.time.min, tzinfo=zone)
+    range_end = datetime.datetime.combine(end_date, datetime.time.min, tzinfo=zone) + datetime.timedelta(days=1)
+    return range_start, range_end
+
+
+

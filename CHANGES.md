@@ -320,7 +320,7 @@ C-01 foundation-setup
 - **Scope**:
   - Página `/paciente/disponibilidad` — selector odontólogo + fecha (calendario), llama `GET /api/disponibilidad`, muestra grid de huecos libres
   - Página `/paciente/solicitar/:slotId` — modal confirmación con campo `motivo`, `POST /api/turnos`
-  - Página `/paciente/mis-turnos` — lista turnos futuros/pasados con badges de estado, botón "Cancelar" (si futuro y ≥ 24h) → `PATCH /api/turnos/{id}/cancelar`
+  - Página `/paciente/mis-turnos` — lista turnos futuros/pasados con badges de estado, botón "Cancelar" (si futuro y ≥ 24h) → `PATCH /api/turnos/{id}` (`{"estado": "cancelado"}`)
   - Navegación en `AppLayout` paciente: "Buscar turno", "Mis turnos"
   - Tests: flujo completo solicitar → ver en mis turnos → cancelar (si aplica)
 - **Dependencias**: `C-05`, `C-06`, `C-10`, `C-12`
