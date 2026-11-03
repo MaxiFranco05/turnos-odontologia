@@ -58,3 +58,12 @@ class TurnoRepository(BaseRepository[Turno, int], Protocol):
     ) -> bool:
         """Checks if any active appointment collides with the given interval (RN-AG-01)."""
         ...
+
+    async def find_daily_agenda(
+        self,
+        start: datetime.datetime,
+        end: datetime.datetime,
+        odontologo_id: int | None = None,
+    ) -> list[Turno]:
+        """Finds all appointments within [start, end) eagerly loading patient and dentist, ordered by inicio, id."""
+        ...
