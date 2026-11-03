@@ -180,7 +180,7 @@ C-01 foundation-setup
 ## FASE 3 — Availability & Appointment Core
 
 ### [C-05] `availability-engine`
-- **Estado**: `[ ]` pendiente (preparado en `openspec/changes/c-05-availability-engine/` — listo para implementar)
+- **Estado**: `[x]` completado (archivado 2026-11-02)
 - **Scope**:
   - CRUD `PlantillaDisponibilidad` (solo recepción): `POST/GET/PATCH/DELETE /api/plantillas` con validación de solape de plantillas del mismo odontólogo (actualizado `PUT → PATCH` por Regla Dura #9)
   - `GET /api/disponibilidad?odontologo_id=&fecha=` — calcula huecos libres derivando de plantilla del día menos turnos vigentes (`solicitado`, `confirmado`, `presente`, `ausente`) del odontólogo, liberando `cancelado` y `anulado`

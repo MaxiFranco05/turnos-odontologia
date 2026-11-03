@@ -38,9 +38,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     from app.api.health import router as health_router
     from app.api.auth import router as auth_router
+    from app.api.plantillas import router as plantillas_router
+    from app.api.disponibilidad import router as disponibilidad_router
 
     app.include_router(health_router)
     app.include_router(auth_router)
+    app.include_router(plantillas_router)
+    app.include_router(disponibilidad_router)
 
     return app
 

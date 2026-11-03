@@ -1,3 +1,4 @@
+import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -39,5 +40,32 @@ class SqlAlchemyPlantillaRepository(
             )
             .order_by(PlantillaDisponibilidad.hora_inicio)
         )
+        result = await self._session.scalars(stmt)
+        return list(result.all())
+
+    async def find_overlapping_templates(
+        self,
+        odontologo_id: int,
+        dia_semana: int,
+        hora_inicio: datetime.time,
+        hora_fin: datetime.time,
+        exclude_id: int | None = None,
+    ) -> list[PlantillaDisponibilidad]:
+        """Finds same-dentist, same-day templates overlapping with [hora_inicio, hora_fin).
+        
+        Strict inequality interval intersection predicate:
+        template.hora_inicio < hora_fin AND template.hora_fin > hora_inicio
+        Treats intervals as half-open [hora_inicio, hora_fin). Contiguous intervals
+        (fin == inicio) do not collide.
+        """
+        stmt = select(PlantillaDisponibilidad).where(
+            PlantillaDisponibilidad.odontologo_id == odontologo_id,
+            PlantillaDisponibilidad.dia_semana == dia_semana,
+            PlantillaDisponibilidad.hora_inicio < hora_fin,
+            PlantillaDisponibilidad.hora_fin > hora_inicio,
+        )
+        if exclude_id is not None:
+            stmt = stmt.where(PlantillaDisponibilidad.id != exclude_id)
+        stmt = stmt.order_by(PlantillaDisponibilidad.hora_inicio)
         result = await self._session.scalars(stmt)
         return list(result.all())
