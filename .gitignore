@@ -44,3 +44,6 @@ dist/
 .vite/
 
 .playwright-mcp/
+
+.venv/
+venv/
