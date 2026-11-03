@@ -9,6 +9,7 @@ export const alertVariants = cva(
       variant: {
         default: 'bg-background text-foreground border-slate-200',
         destructive: 'border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive bg-rose-50',
+        success: 'border-emerald-200 text-emerald-900 bg-emerald-50 [&>svg]:text-emerald-700',
       },
     },
     defaultVariants: {

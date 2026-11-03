@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { describe, it, expect } from 'vitest';
 import { ProtectedRoute } from './ProtectedRoute';
+import { router } from './routes';
 import type { UserProfile } from '@/types/auth';
 import { getDefaultRouteForUser } from '@/types/auth';
 
@@ -127,5 +128,24 @@ describe('Router & ProtectedRoute (Strict TDD)', () => {
     expect(getDefaultRouteForUser({ rol: 'recepcion', debe_cambiar_password: false })).toBe('/recepcion/agenda');
     expect(getDefaultRouteForUser({ rol: 'odontologo', debe_cambiar_password: false })).toBe('/odontologo/agenda');
     expect(getDefaultRouteForUser({ rol: 'paciente', debe_cambiar_password: false })).toBe('/paciente/mis-turnos');
+  });
+
+  it('mounts RecepcionAgendaPage and RecepcionPlantillasPage in router configuration (C-14)', () => {
+    const serializedRoutes = JSON.stringify(router.routes, (_key, value: unknown) => {
+      if (typeof value === 'object' && value !== null && 'type' in value) {
+        const elementObj = value as { type?: { name?: string; displayName?: string } | string };
+        if (typeof elementObj.type === 'function') {
+          return {
+            ...elementObj,
+            componentName: elementObj.type.displayName || elementObj.type.name,
+          };
+        }
+      }
+      return value;
+    });
+
+    expect(serializedRoutes).toContain('RecepcionAgendaPage');
+    expect(serializedRoutes).toContain('RecepcionPlantillasPage');
+    expect(serializedRoutes).not.toContain('a implementar en C-14');
   });
 });

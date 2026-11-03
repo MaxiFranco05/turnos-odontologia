@@ -4,6 +4,8 @@ import AppLayout from '@/layouts/AppLayout';
 import ProtectedRoute from './ProtectedRoute';
 import LoginPage from '@/pages/LoginPage';
 import CambiarPasswordPage from '@/pages/CambiarPasswordPage';
+import RecepcionAgendaPage from '@/pages/RecepcionAgendaPage';
+import RecepcionPlantillasPage from '@/pages/RecepcionPlantillasPage';
 
 export const router = createBrowserRouter([
   // Public authentication & mandatory password change routes (C-04 / C-12)
@@ -36,25 +38,11 @@ export const router = createBrowserRouter([
           // Recepción (C-14)
           {
             path: 'recepcion/agenda',
-            element: (
-              <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-bold text-slate-900">Agenda del Día (Recepción)</h2>
-                <p className="mt-2 text-slate-600">
-                  Módulo de confirmación y anulación de turnos diarios (a implementar en C-14).
-                </p>
-              </div>
-            ),
+            element: <RecepcionAgendaPage />,
           },
           {
             path: 'recepcion/plantillas',
-            element: (
-              <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-bold text-slate-900">Plantillas de Disponibilidad</h2>
-                <p className="mt-2 text-slate-600">
-                  Módulo de configuración de horarios por odontólogo (a implementar en C-14).
-                </p>
-              </div>
-            ),
+            element: <RecepcionPlantillasPage />,
           },
           // Odontólogo (C-15)
           {

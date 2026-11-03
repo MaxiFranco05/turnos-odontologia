@@ -331,7 +331,7 @@ C-01 foundation-setup
   - `knowledge-base/08_arquitectura_propuesta.md` §Estructura de directorios frontend
 
 ### [C-14] `reception-features`
-- **Estado**: `[ ]` pendiente
+- **Estado**: [x] completado (archivado 2026-11-03)
 - **Scope**:
   - Página `/recepcion/agenda` — vista día (selector fecha), tabla con todos los turnos: paciente, odontólogo, hora, motivo, estado, origen, acciones
   - Acciones por fila: "Confirmar" (si `solicitado`) → `PATCH /confirmar`, "Anular" (si `solicitado`/`confirmado`) → `PATCH /anular` con confirmación anticipación
