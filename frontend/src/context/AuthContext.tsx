@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
-import type { UserProfile, RolUsuario } from '@/types/auth';
-import { clearAuthToken, setAuthToken } from '@/lib/api';
+import type { UserProfile, RolUsuario, TokenResponsePayload } from '@/types/auth';
+import { clearAuthSession, loadAuthSession, saveAuthSession } from '@/services/authService';
+import { setAuthToken } from '@/lib/api';
 
 export const MOCK_USERS: Record<RolUsuario, UserProfile> = {
   recepcion: {
@@ -9,6 +10,8 @@ export const MOCK_USERS: Record<RolUsuario, UserProfile> = {
     nombre: 'María',
     apellido: 'López',
     rol: 'recepcion',
+    debe_cambiar_password: false,
+    perfil_completo: true,
   },
   odontologo: {
     id: 2,
@@ -16,6 +19,8 @@ export const MOCK_USERS: Record<RolUsuario, UserProfile> = {
     nombre: 'Dr. Carlos',
     apellido: 'Sosa',
     rol: 'odontologo',
+    debe_cambiar_password: false,
+    perfil_completo: true,
   },
   paciente: {
     id: 3,
@@ -23,12 +28,15 @@ export const MOCK_USERS: Record<RolUsuario, UserProfile> = {
     nombre: 'Lucía',
     apellido: 'Fernández',
     rol: 'paciente',
+    debe_cambiar_password: false,
+    perfil_completo: true,
   },
 };
 
 export interface AuthContextType {
   user: UserProfile | null;
   setUser: (user: UserProfile | null) => void;
+  establishSession: (response: TokenResponsePayload, identifier?: string, remember?: boolean) => void;
   loginAs: (role: RolUsuario) => void;
   logout: () => void;
 }
@@ -36,7 +44,33 @@ export interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  // Synchronous hydration from storage on mount (avoids useEffect per Hard Rule #6)
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    const session = loadAuthSession();
+    return session?.user ?? null;
+  });
+
+  const establishSession = (
+    response: TokenResponsePayload,
+    identifier?: string,
+    remember: boolean = true
+  ): void => {
+    saveAuthSession(response, remember, identifier);
+    const session = loadAuthSession();
+    if (session) {
+      setUser(session.user);
+    } else {
+      setUser({
+        id: 1,
+        email: identifier || 'user@clinica.com',
+        rol: response.rol,
+        nombre: response.rol.charAt(0).toUpperCase() + response.rol.slice(1),
+        apellido: 'Usuario',
+        debe_cambiar_password: response.debe_cambiar_password,
+        perfil_completo: response.perfil_completo,
+      });
+    }
+  };
 
   const loginAs = (role: RolUsuario): void => {
     const mock = MOCK_USERS[role];
@@ -45,12 +79,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = (): void => {
-    clearAuthToken();
+    clearAuthSession();
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, loginAs, logout }}>
+    <AuthContext.Provider value={{ user, setUser, establishSession, loginAs, logout }}>
       {children}
     </AuthContext.Provider>
   );

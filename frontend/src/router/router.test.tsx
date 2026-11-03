@@ -4,6 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { describe, it, expect } from 'vitest';
 import { ProtectedRoute } from './ProtectedRoute';
 import type { UserProfile } from '@/types/auth';
+import { getDefaultRouteForUser } from '@/types/auth';
 
 describe('Router & ProtectedRoute (Strict TDD)', () => {
   it('redirects unauthenticated user to /login', () => {
@@ -118,5 +119,13 @@ describe('Router & ProtectedRoute (Strict TDD)', () => {
 
     expect(screen.getByText(/mis turnos paciente/i)).toBeInTheDocument();
     expect(screen.queryByText(/pantalla cambiar contraseña/i)).not.toBeInTheDocument();
+  });
+
+  it('getDefaultRouteForUser resolves correct path per role and password state', () => {
+    expect(getDefaultRouteForUser(null)).toBe('/login');
+    expect(getDefaultRouteForUser({ rol: 'recepcion', debe_cambiar_password: true })).toBe('/cambiar-password');
+    expect(getDefaultRouteForUser({ rol: 'recepcion', debe_cambiar_password: false })).toBe('/recepcion/agenda');
+    expect(getDefaultRouteForUser({ rol: 'odontologo', debe_cambiar_password: false })).toBe('/odontologo/agenda');
+    expect(getDefaultRouteForUser({ rol: 'paciente', debe_cambiar_password: false })).toBe('/paciente/mis-turnos');
   });
 });

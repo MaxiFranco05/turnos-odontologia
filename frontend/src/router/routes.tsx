@@ -2,6 +2,8 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AuthLayout from '@/layouts/AuthLayout';
 import AppLayout from '@/layouts/AppLayout';
 import ProtectedRoute from './ProtectedRoute';
+import LoginPage from '@/pages/LoginPage';
+import CambiarPasswordPage from '@/pages/CambiarPasswordPage';
 
 export const router = createBrowserRouter([
   // Public authentication & mandatory password change routes (C-04 / C-12)
@@ -15,25 +17,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'login',
-        element: (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-slate-900">Iniciar Sesión</h2>
-            <p className="text-sm text-slate-500">
-              El formulario de autenticación se implementa en el change C-12.
-            </p>
-          </div>
-        ),
+        element: <LoginPage />,
       },
       {
         path: 'cambiar-password',
-        element: (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-slate-900">Cambio Obligatorio de Contraseña</h2>
-            <p className="text-sm text-slate-500">
-              Debe actualizar su contraseña temporal antes de continuar (formulario interactivo en C-12).
-            </p>
-          </div>
-        ),
+        element: <CambiarPasswordPage />,
       },
     ],
   },

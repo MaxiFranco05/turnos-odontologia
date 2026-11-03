@@ -303,7 +303,7 @@ C-01 foundation-setup
   - `knowledge-base/03_actores_y_roles.md` §Rutas públicas
 
 ### [C-12] `login-page`
-- **Estado**: `[ ]` pendiente
+- **Estado**: [x] completado
 - **Scope**:
   - Página `/login` con formulario: identificador (email o nro_socio), password, checkbox "Recordar"
   - Submit → `POST /api/auth/login`; guarda tokens en `localStorage` (access) + `httpOnly cookie` (refresh si se usa)
@@ -396,6 +396,19 @@ C-01 foundation-setup
 - **Governance**: MEDIO
 - **Leer antes**:
   - `knowledge-base/08_arquitectura_propuesta.md` §Estructura de directorios, §Variables de entorno
+
+### [C-19] `ui-dark-mode-theme` (Polish Visual)
+- **Estado**: `[ ]` pendiente (planificado post-portales)
+- **Scope**:
+  - Configuración de tokens `.dark` en `frontend/src/index.css` (Slate 950 base, Slate 900 tarjetas, textos Slate 100 de alto contraste WCAG AA)
+  - Soporte `darkMode: 'class'` en `frontend/tailwind.config.js`
+  - Componente `ThemeToggle` (Sol / Luna) en el header de `AppLayout` y en `AuthLayout`
+  - Persistencia de preferencia de tema (`light` | `dark` | `system`) en `localStorage`
+  - Tests: toggle conmuta clase `dark` en `document.documentElement` y persiste preferencia
+- **Dependencias**: `C-13`, `C-14`, `C-15`
+- **Governance**: BAJO
+- **Leer antes**:
+  - `knowledge-base/08_arquitectura_propuesta.md` §Frontend
 
 ### [C-18] `testing-core`
 - **Estado**: `[ ]` pendiente

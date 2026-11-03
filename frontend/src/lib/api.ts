@@ -9,25 +9,32 @@ interface ErrorResponseData {
 
 export function getAuthToken(): string | null {
   try {
-    return localStorage.getItem(TOKEN_KEY);
+    return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
   } catch {
     return null;
   }
 }
 
-export function setAuthToken(token: string): void {
+export function setAuthToken(token: string, remember: boolean = true): void {
   try {
-    localStorage.setItem(TOKEN_KEY, token);
+    if (remember) {
+      sessionStorage.removeItem(TOKEN_KEY);
+      localStorage.setItem(TOKEN_KEY, token);
+    } else {
+      localStorage.removeItem(TOKEN_KEY);
+      sessionStorage.setItem(TOKEN_KEY, token);
+    }
   } catch {
-    // LocalStorage might be restricted
+    // LocalStorage or sessionStorage might be restricted
   }
 }
 
 export function clearAuthToken(): void {
   try {
     localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
   } catch {
-    // LocalStorage might be restricted
+    // LocalStorage or sessionStorage might be restricted
   }
 }
 
