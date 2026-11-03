@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.domain.models.base import Base
-from app.domain.models.enums import EstadoTurno, RolUsuario
+from app.domain.models.enums import EstadoTurno, OrigenTurno, RolUsuario
 from app.domain.models.plantilla import PlantillaDisponibilidad
 from app.domain.models.turno import Turno
 from app.domain.models.usuario import Usuario
@@ -175,6 +175,109 @@ async def test_turno_repository_range_and_overlap(async_session: AsyncSession, s
         fin=base_time + datetime.timedelta(hours=2, minutes=30),
     )
     assert has_ov_cancelled is False
+
+
+@pytest.mark.asyncio
+async def test_turno_repository_find_daily_agenda(async_session: AsyncSession, seeded_data):
+    """Verifies TurnoRepository.find_daily_agenda with eager loading and dentist filtering."""
+    repo = SqlAlchemyTurnoRepository(async_session)
+    pac = seeded_data["paciente"]
+    odo1 = seeded_data["odontologo"]
+
+    # Create a second dentist and second patient
+    odo2 = Usuario(
+        nombre="Dra. Odontologa Dos",
+        email="odo2@example.com",
+        nro_socio="ODO-REPO-2",
+        password_hash="pw_hash",
+        rol=RolUsuario.ODONTOLOGO,
+    )
+    pac2 = Usuario(
+        nombre="Paciente Dos",
+        email="pac2@example.com",
+        nro_socio="SOC-REPO-2",
+        password_hash="pw_hash",
+        rol=RolUsuario.PACIENTE,
+    )
+    async_session.add_all([odo2, pac2])
+    await async_session.commit()
+    await async_session.refresh(odo2)
+    await async_session.refresh(pac2)
+
+    day_start = datetime.datetime(2026, 11, 25, 0, 0, 0, tzinfo=datetime.timezone.utc)
+    day_end = datetime.datetime(2026, 11, 26, 0, 0, 0, tzinfo=datetime.timezone.utc)
+
+    # 1. Turno Odo1 Pac1 at 09:00 (confirmado, online)
+    t1 = Turno(
+        paciente_id=pac.id,
+        odontologo_id=odo1.id,
+        inicio=day_start + datetime.timedelta(hours=9),
+        fin=day_start + datetime.timedelta(hours=9, minutes=30),
+        motivo="Limpieza",
+        estado=EstadoTurno.CONFIRMADO,
+        origen=OrigenTurno.ONLINE,
+    )
+    # 2. Turno Odo2 Pac2 at 10:00 (cancelado, online - US-005 tracking)
+    t2 = Turno(
+        paciente_id=pac2.id,
+        odontologo_id=odo2.id,
+        inicio=day_start + datetime.timedelta(hours=10),
+        fin=day_start + datetime.timedelta(hours=10, minutes=30),
+        motivo="Control",
+        estado=EstadoTurno.CANCELADO,
+        origen=OrigenTurno.ONLINE,
+    )
+    # 3. Turno Odo1 Pac2 at 11:00 (solicitado, recepcion)
+    t3 = Turno(
+        paciente_id=pac2.id,
+        odontologo_id=odo1.id,
+        inicio=day_start + datetime.timedelta(hours=11),
+        fin=day_start + datetime.timedelta(hours=11, minutes=30),
+        motivo="Extraccion",
+        estado=EstadoTurno.SOLICITADO,
+        origen=OrigenTurno.MANUAL,
+    )
+    # 4. Turno next day (should NOT appear)
+    t_next_day = Turno(
+        paciente_id=pac.id,
+        odontologo_id=odo1.id,
+        inicio=day_end + datetime.timedelta(hours=9),
+        fin=day_end + datetime.timedelta(hours=9, minutes=30),
+        motivo="Otro dia",
+        estado=EstadoTurno.CONFIRMADO,
+        origen=OrigenTurno.ONLINE,
+    )
+    await repo.add(t1)
+    await repo.add(t2)
+    await repo.add(t3)
+    await repo.add(t_next_day)
+    await async_session.commit()
+
+    # Query all dentists for the day
+    agenda_all = await repo.find_daily_agenda(start=day_start, end=day_end)
+    assert len(agenda_all) == 3
+    # Check ordering by inicio
+    assert [t.id for t in agenda_all] == [t1.id, t2.id, t3.id]
+    # Check eager loading (paciente and odontologo populated without query)
+    assert agenda_all[0].paciente.nombre == pac.nombre
+    assert agenda_all[0].odontologo.nombre == odo1.nombre
+    # Check cancelled appointment is included with its state and origin (US-005)
+    assert agenda_all[1].estado == EstadoTurno.CANCELADO
+    assert agenda_all[1].origen == OrigenTurno.ONLINE
+    assert agenda_all[1].odontologo.nombre == odo2.nombre
+
+    # Filter by specific dentist (odo1)
+    agenda_odo1 = await repo.find_daily_agenda(start=day_start, end=day_end, odontologo_id=odo1.id)
+    assert len(agenda_odo1) == 2
+    assert [t.id for t in agenda_odo1] == [t1.id, t3.id]
+
+    # Filter by dentist with no appointments on that day
+    agenda_empty = await repo.find_daily_agenda(
+        start=day_start,
+        end=day_end,
+        odontologo_id=999999,
+    )
+    assert agenda_empty == []
 
 
 @pytest.mark.asyncio

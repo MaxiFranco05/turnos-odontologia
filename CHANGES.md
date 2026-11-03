@@ -238,7 +238,7 @@ C-01 foundation-setup
 ## FASE 4 — Role-specific Views & Actions
 
 ### [C-08] `reception-agenda`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**:
   - `GET /api/agenda/dia?fecha=` — retorna todos los turnos del día con: paciente (nombre, contacto), odontólogo, inicio, fin, motivo, estado, origen
   - Filtro opcional por `odontologo_id`

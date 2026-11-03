@@ -120,3 +120,28 @@ class SqlAlchemyTurnoRepository(SqlAlchemyBaseRepository[Turno, int], TurnoRepos
             exclude_turno_id=exclude_turno_id,
         )
         return len(overlaps) > 0
+
+    async def find_daily_agenda(
+        self,
+        start: datetime.datetime,
+        end: datetime.datetime,
+        odontologo_id: int | None = None,
+    ) -> list[Turno]:
+        """Finds all appointments within [start, end) eagerly loading patient and dentist, ordered by inicio, id."""
+        stmt = (
+            select(Turno)
+            .options(
+                selectinload(Turno.paciente),
+                selectinload(Turno.odontologo),
+            )
+            .where(
+                Turno.inicio >= start,
+                Turno.inicio < end,
+            )
+            .order_by(Turno.inicio, Turno.id)
+        )
+        if odontologo_id is not None:
+            stmt = stmt.where(Turno.odontologo_id == odontologo_id)
+
+        result = await self._session.scalars(stmt)
+        return list(result.all())
