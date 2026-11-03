@@ -26,11 +26,11 @@ The system SHALL allow an authenticated `odontologo` user (`debe_cambiar_passwor
 - **THEN** the system returns both appointments in exact chronological order (`09:00`, then `09:30`) and excludes appointments from `2027-06-06` or `2027-06-08` (`CB-01`)
 
 ### Requirement: Role-Based Access Control and Password-Change Enforcement on Dentist Agenda
-The system SHALL restrict `GET /api/mis-turnos?fecha=YYYY-MM-DD` (in `C-09`) to authenticated users with role `odontologo` and `debe_cambiar_password=False`, rejecting unauthenticated requests with HTTP `401 Unauthorized` and unauthorized roles or pending password changes with HTTP `403 Forbidden` (`RN-AU-02`, `RN-GL-01`, `US-010`).
+The system SHALL restrict `GET /api/mis-turnos` to authenticated users with role `odontologo` or `paciente` and `debe_cambiar_password=False`, rejecting unauthenticated requests with HTTP `401 Unauthorized` and `recepcion` role or pending password changes with HTTP `403 Forbidden` (`RN-AU-02`, `RN-GL-01`, `US-010`).
 
 #### Scenario: Reject access by patient or reception role (Business Error)
-- **WHEN** an authenticated `paciente` or `recepcion` user requests `GET /api/mis-turnos?fecha=2027-06-07`
-- **THEN** the system rejects the request with HTTP `403 Forbidden` (`RN-GL-01`, `03_actores_y_roles.md`)
+- **WHEN** an authenticated `recepcion` user requests `GET /api/mis-turnos?fecha=2027-06-07`, or an authenticated `paciente` user requests the dentist-only query `GET /api/mis-turnos?fecha=2027-06-07`
+- **THEN** the system rejects `recepcion` with HTTP `403 Forbidden` (`RN-GL-01`, `03_actores_y_roles.md`) and rejects the `paciente` dentist-parameter query with HTTP `422 Unprocessable Entity`
 
 #### Scenario: Reject access when dentist has pending temporary password change (Business Error)
 - **WHEN** an authenticated `odontologo` user with `debe_cambiar_password=True` requests `GET /api/mis-turnos?fecha=2027-06-07`

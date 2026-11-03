@@ -265,7 +265,7 @@ C-01 foundation-setup
   - `knowledge-base/07_flujos_principales.md` Flujo 4
 
 ### [C-10] `patient-portal`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**:
   - `GET /api/mis-turnos?fecha_desde=&fecha_hasta=` — turnos del paciente autenticado en rango
   - `PATCH /api/turnos/{id}` (`{"estado": "cancelado"}`) — ya cubierto en C-07, expuesto aquí como acción de paciente
