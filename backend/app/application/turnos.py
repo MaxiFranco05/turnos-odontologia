@@ -160,3 +160,19 @@ def validate_state_transition(
                 "RN-GL-02: No se puede confirmar un turno cuya fecha u hora de inicio ya ha transcurrido."
             )
 
+
+def get_clinic_day_bounds(
+    fecha: datetime.date,
+    timezone_str: str | None = None,
+) -> tuple[datetime.datetime, datetime.datetime]:
+    """Pure synchronous helper computing the half-open clinic day interval [00:00:00, +1 day 00:00:00).
+
+    Strictly adheres to Hard Rule #3: synchronous def with zero I/O or infrastructure imports.
+    """
+    tz_name = timezone_str or DEFAULT_CLINIC_TIMEZONE
+    zone = ZoneInfo(tz_name)
+    day_start = datetime.datetime.combine(fecha, datetime.time.min, tzinfo=zone)
+    day_end = day_start + datetime.timedelta(days=1)
+    return day_start, day_end
+
+

@@ -252,7 +252,7 @@ C-01 foundation-setup
   - `knowledge-base/07_flujos_principales.md` Flujo 3
 
 ### [C-09] `dentist-agenda`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**:
   - `GET /api/mis-turnos?fecha=` — retorna turnos del odontólogo autenticado para la fecha
   - Solo accesible por rol `odontologo`; filtro automático por `odontologo_id = current_user.id`
@@ -349,7 +349,7 @@ C-01 foundation-setup
 - **Estado**: `[ ]` pendiente
 - **Scope**:
   - Página `/odontologo/agenda` — vista día (selector fecha), lista solo sus turnos con paciente, hora, motivo, estado
-  - Acciones por fila: "Marcar presente" / "Marcar ausente" (si `confirmado`) → `PATCH /marcar-presente|ausente`
+  - Acciones por fila: "Marcar presente" / "Marcar ausente" (si `confirmado`) → `PATCH /api/turnos/{id}` (`{"estado": "presente" | "ausente"}`)
   - Navegación odontólogo: "Mi agenda"
   - Tests: solo ve propios, marcar presente/ausente funciona, 403 si intenta turno ajeno
 - **Dependencias**: `C-09`, `C-12`

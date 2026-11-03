@@ -1,6 +1,7 @@
 import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.domain.models.enums import EstadoTurno
 from app.domain.models.turno import Turno
@@ -25,9 +26,10 @@ class SqlAlchemyTurnoRepository(SqlAlchemyBaseRepository[Turno, int], TurnoRepos
         start: datetime.datetime,
         end: datetime.datetime,
     ) -> list[Turno]:
-        """Finds appointments for a dentist overlapping or within the time window."""
+        """Finds appointments for a dentist overlapping or within the time window, eagerly loading paciente."""
         stmt = (
             select(Turno)
+            .options(selectinload(Turno.paciente))
             .where(
                 Turno.odontologo_id == odontologo_id,
                 Turno.inicio < end,
