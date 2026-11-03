@@ -14,6 +14,11 @@ class SqlAlchemyTurnoRepository(SqlAlchemyBaseRepository[Turno, int], TurnoRepos
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session=session, model_cls=Turno)
 
+    async def get_by_id_for_update(self, id: int) -> Turno | None:
+        """Retrieves an appointment by ID acquiring a row-level FOR UPDATE lock (Hard Rule #2)."""
+        stmt = select(Turno).where(Turno.id == id).with_for_update()
+        return await self._session.scalar(stmt)
+
     async def find_by_dentist_range(
         self,
         odontologo_id: int,

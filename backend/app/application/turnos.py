@@ -2,9 +2,38 @@ import datetime
 from zoneinfo import ZoneInfo
 
 from app.application.availability import calculate_free_slots
+from app.domain.models.enums import EstadoTurno, RolUsuario
 from app.domain.models.plantilla import PlantillaDisponibilidad
 
 DEFAULT_CLINIC_TIMEZONE = "America/Argentina/Buenos_Aires"
+DEFAULT_CANCEL_MIN_HOURS = 24
+
+
+class UnauthorizedTransitionError(Exception):
+    """Raised when a user's role or resource ownership forbids the requested state transition (HTTP 403)."""
+
+
+class InvalidStateTransitionError(Exception):
+    """Raised when the appointment's current state does not allow transitioning to the target state (HTTP 409)."""
+
+
+class AnticipationWindowError(Exception):
+    """Raised when a cancellation/annulment violates CANCEL_MIN_HOURS or confirmation is in the past (HTTP 422)."""
+
+
+_ROLE_ALLOWED_TARGETS: dict[RolUsuario, frozenset[EstadoTurno]] = {
+    RolUsuario.PACIENTE: frozenset({EstadoTurno.CANCELADO}),
+    RolUsuario.RECEPCION: frozenset({EstadoTurno.CONFIRMADO, EstadoTurno.ANULADO}),
+    RolUsuario.ODONTOLOGO: frozenset({EstadoTurno.PRESENTE, EstadoTurno.AUSENTE}),
+}
+
+_VALID_SOURCE_STATES: dict[EstadoTurno, frozenset[EstadoTurno]] = {
+    EstadoTurno.CONFIRMADO: frozenset({EstadoTurno.SOLICITADO}),
+    EstadoTurno.CANCELADO: frozenset({EstadoTurno.SOLICITADO, EstadoTurno.CONFIRMADO}),
+    EstadoTurno.ANULADO: frozenset({EstadoTurno.SOLICITADO, EstadoTurno.CONFIRMADO}),
+    EstadoTurno.PRESENTE: frozenset({EstadoTurno.CONFIRMADO}),
+    EstadoTurno.AUSENTE: frozenset({EstadoTurno.CONFIRMADO}),
+}
 
 
 def _normalize_dt(dt: datetime.datetime, zone: ZoneInfo) -> datetime.datetime:
@@ -67,3 +96,67 @@ def validate_slot_matches_template(
     raise ValueError(
         "RN-AG-02: El intervalo solicitado no coincide con un slot válido de la plantilla del odontólogo."
     )
+
+
+def validate_state_transition(
+    actor_rol: RolUsuario,
+    actor_user_id: int,
+    turno_paciente_id: int,
+    turno_odontologo_id: int,
+    estado_actual: EstadoTurno,
+    nuevo_estado: EstadoTurno,
+    turno_inicio: datetime.datetime,
+    now_local: datetime.datetime,
+    cancel_min_hours: int = DEFAULT_CANCEL_MIN_HOURS,
+    timezone_str: str | None = None,
+) -> None:
+    """Pure synchronous appointment state-machine and anticipation validator.
+
+    Strictly adheres to:
+    - Hard Rule #3 & Clean Architecture: 100% pure synchronous def function with zero I/O,
+      zero system-clock calls, and zero infrastructure imports.
+    - Defense-in-depth evaluation order:
+      1. Role-to-target-state allowlist (RN-TU-01..04, RN-GL-01) -> UnauthorizedTransitionError (403)
+      2. Resource ownership (RN-AU-02, RN-GL-01, OWASP BOLA) -> UnauthorizedTransitionError (403)
+      3. Source-to-target state matrix (DD-03, US-004, US-006, US-008) -> InvalidStateTransitionError (409)
+      4. Minimum anticipation & future check (RN-TU-05, RN-GL-02) -> AnticipationWindowError (422)
+    """
+    allowed_targets = _ROLE_ALLOWED_TARGETS.get(actor_rol, frozenset())
+    if nuevo_estado not in allowed_targets:
+        raise UnauthorizedTransitionError(
+            f"RN-GL-01: El rol '{actor_rol.value}' no tiene permiso para transicionar un turno al estado '{nuevo_estado.value}'."
+        )
+
+    if actor_rol == RolUsuario.PACIENTE and turno_paciente_id != actor_user_id:
+        raise UnauthorizedTransitionError(
+            "RN-GL-01: El paciente solo puede cancelar sus propios turnos."
+        )
+
+    if actor_rol == RolUsuario.ODONTOLOGO and turno_odontologo_id != actor_user_id:
+        raise UnauthorizedTransitionError(
+            "RN-AU-02: El odontólogo solo puede registrar asistencia sobre sus propios turnos asignados."
+        )
+
+    valid_sources = _VALID_SOURCE_STATES.get(nuevo_estado, frozenset())
+    if estado_actual not in valid_sources:
+        raise InvalidStateTransitionError(
+            f"Transición de estado inválida: no se puede pasar de '{estado_actual.value}' a '{nuevo_estado.value}'."
+        )
+
+    tz_name = timezone_str or DEFAULT_CLINIC_TIMEZONE
+    zone = ZoneInfo(tz_name)
+    inicio_norm = _normalize_dt(turno_inicio, zone)
+    now_norm = _normalize_dt(now_local, zone)
+
+    if nuevo_estado in (EstadoTurno.CANCELADO, EstadoTurno.ANULADO):
+        min_delta = datetime.timedelta(hours=cancel_min_hours)
+        if inicio_norm - now_norm < min_delta:
+            raise AnticipationWindowError(
+                f"RN-TU-05: La cancelación o anulación requiere al menos {cancel_min_hours} horas de anticipación."
+            )
+    elif nuevo_estado == EstadoTurno.CONFIRMADO:
+        if inicio_norm <= now_norm:
+            raise AnticipationWindowError(
+                "RN-GL-02: No se puede confirmar un turno cuya fecha u hora de inicio ya ha transcurrido."
+            )
+

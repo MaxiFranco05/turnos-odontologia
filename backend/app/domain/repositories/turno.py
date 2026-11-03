@@ -7,6 +7,10 @@ from app.domain.repositories.base import BaseRepository
 class TurnoRepository(BaseRepository[Turno, int], Protocol):
     """Domain repository interface for Turno entities."""
 
+    async def get_by_id_for_update(self, id: int) -> Turno | None:
+        """Retrieves an appointment by primary key acquiring a row-level FOR UPDATE lock."""
+        ...
+
     async def find_by_dentist_range(
         self,
         odontologo_id: int,

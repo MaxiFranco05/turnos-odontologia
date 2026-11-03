@@ -214,20 +214,16 @@ C-01 foundation-setup
   - `knowledge-base/08_arquitectura_propuesta.md` §Patrones (invariante de servidor)
 
 ### [C-07] `appointment-state-machine`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado
 - **Scope**:
   - Enum `EstadoTurno`: `solicitado`, `confirmado`, `anulado`, `cancelado`, `presente`, `ausente`
   - Matriz de transiciones por rol (validación en servidor):
-    - Paciente: `solicitado` → `cancelado` (solo propios, anticipación ≥ 24h)
-    - Recepción: `solicitado` → `confirmado` | `anulado` (todos, anticipación ≥ 24h para anular)
+    - Paciente: `solicitado` | `confirmado` → `cancelado` (solo propios, anticipación ≥ 24h)
+    - Recepción: `solicitado` → `confirmado` (futuros) y `solicitado` | `confirmado` → `anulado` (todos, anticipación ≥ 24h para anular)
     - Odontólogo: `confirmado` → `presente` | `ausente` (solo propios)
-  - Endpoints de transición:
-    - `PATCH /api/turnos/{id}/confirmar` (recepción)
-    - `PATCH /api/turnos/{id}/anular` (recepción)
-    - `PATCH /api/turnos/{id}/cancelar` (paciente)
-    - `PATCH /api/turnos/{id}/marcar-presente` (odontólogo)
-    - `PATCH /api/turnos/{id}/marcar-ausente` (odontólogo)
-  - Cada endpoint valida rol, propiedad del turno, anticipación (para cancelar/anular), estado origen válido
+  - Endpoint de transición orientado a recursos (Reglas Duras #8 y #9 — sin verbos en URI):
+    - `PATCH /api/turnos/{id}` con body `{"estado": "confirmado" | "anulado" | "cancelado" | "presente" | "ausente"}` (`TurnoEstadoUpdate`, `ConfigDict(extra="forbid")`)
+  - El endpoint valida rol, propiedad del turno, estado origen válido y anticipación mínima (`CANCEL_MIN_HOURS=24` para cancelar/anular, y fecha futura para confirmar)
   - Tests: matriz completa de transiciones válidas/inválidas, autorización cruzada (403), anticipación mínima
 - **Dependencias**: `C-06`
 - **Governance**: CRITICO
@@ -272,7 +268,7 @@ C-01 foundation-setup
 - **Estado**: `[ ]` pendiente
 - **Scope**:
   - `GET /api/mis-turnos?fecha_desde=&fecha_hasta=` — turnos del paciente autenticado en rango
-  - `PATCH /api/turnos/{id}/cancelar` — ya cubierto en C-07, expuesto aquí como acción de paciente
+  - `PATCH /api/turnos/{id}` (`{"estado": "cancelado"}`) — ya cubierto en C-07, expuesto aquí como acción de paciente
   - Solo accesible por rol `paciente`
   - Tests: lista mis turnos, no ve ajenos, cancelar respeta anticipación
 - **Dependencias**: `C-03`, `C-07`

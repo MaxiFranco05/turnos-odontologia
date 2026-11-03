@@ -9,7 +9,14 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_roles
-from app.application.turnos import DEFAULT_CLINIC_TIMEZONE, validate_slot_matches_template
+from app.application.turnos import (
+    DEFAULT_CLINIC_TIMEZONE,
+    AnticipationWindowError,
+    InvalidStateTransitionError,
+    UnauthorizedTransitionError,
+    validate_slot_matches_template,
+    validate_state_transition,
+)
 from app.domain.models.enums import EstadoTurno, OrigenTurno, RolUsuario
 from app.domain.models.turno import Turno
 from app.domain.models.usuario import Usuario
@@ -68,6 +75,18 @@ class TurnoResponse(BaseModel):
     origen: OrigenTurno
     creado_en: datetime.datetime
     actualizado_en: datetime.datetime
+
+
+class TurnoEstadoUpdate(BaseModel):
+    """Schema for partial appointment state transitions (PATCH /api/turnos/{id}).
+
+    Hard Rule #1: extra='forbid' to reject undeclared fields and prevent mass assignment.
+    Hard Rules #8 & #9: resource-oriented PATCH replacing verb subpaths.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    estado: EstadoTurno
 
 
 @router.post(
@@ -178,3 +197,85 @@ async def create_turno_request(
         ) from exc
 
     return TurnoResponse.model_validate(created)
+
+
+@router.patch(
+    "/{id}",
+    response_model=TurnoResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def transition_turno_state(
+    id: int,
+    request: Request,
+    payload: TurnoEstadoUpdate,
+    current_user: Annotated[
+        Usuario,
+        Depends(
+            require_roles(
+                RolUsuario.PACIENTE,
+                RolUsuario.RECEPCION,
+                RolUsuario.ODONTOLOGO,
+            )
+        ),
+    ],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> TurnoResponse:
+    """Transitions the lifecycle state of an existing appointment (PATCH /api/turnos/{id}).
+
+    Strictly adheres to:
+    - Hard Rule #1: TurnoEstadoUpdate with ConfigDict(extra='forbid').
+    - Hard Rule #2: SQLAlchemy 2.0 select(Turno).where(Turno.id == id).with_for_update().
+    - Hard Rule #3: Pure synchronous validate_state_transition(...) in application layer.
+    - Hard Rules #8 & #9: Resource-oriented PATCH URI without verbs in path.
+    - RN-TU-01..05, RN-GL-01..02, RN-AU-02: Role allowlist, BOLA ownership check, state matrix, and 24h anticipation.
+    """
+    settings: Settings = getattr(request.app.state, "settings", None) or get_settings()
+    zone = ZoneInfo(settings.TIMEZONE)
+    now_local = datetime.datetime.now(zone)
+
+    turno_repo = SqlAlchemyTurnoRepository(db)
+    turno = await turno_repo.get_by_id_for_update(id)
+    if turno is None:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Turno con ID {id} no encontrado.",
+        )
+
+    try:
+        validate_state_transition(
+            actor_rol=current_user.rol,
+            actor_user_id=current_user.id,
+            turno_paciente_id=turno.paciente_id,
+            turno_odontologo_id=turno.odontologo_id,
+            estado_actual=turno.estado,
+            nuevo_estado=payload.estado,
+            turno_inicio=turno.inicio,
+            now_local=now_local,
+            cancel_min_hours=settings.CANCEL_MIN_HOURS,
+            timezone_str=settings.TIMEZONE,
+        )
+    except UnauthorizedTransitionError as exc:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
+        ) from exc
+    except InvalidStateTransitionError as exc:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
+    except AnticipationWindowError as exc:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
+
+    turno.estado = payload.estado
+    await db.commit()
+    await db.refresh(turno)
+    return TurnoResponse.model_validate(turno)
+
