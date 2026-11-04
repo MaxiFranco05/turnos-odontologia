@@ -394,14 +394,26 @@ C-01 foundation-setup
   - `knowledge-base/08_arquitectura_propuesta.md` §Estructura de directorios, §Variables de entorno
 
 ### [C-19] `ui-dark-mode-theme` (Polish Visual)
-- **Estado**: `[ ]` pendiente (planificado post-portales)
+- **Estado**: `[x]` completado (2026-11-03)
 - **Scope**:
-  - Configuración de tokens `.dark` en `frontend/src/index.css` (Slate 950 base, Slate 900 tarjetas, textos Slate 100 de alto contraste WCAG AA)
+  - Configuración de tokens `.dark` en `frontend/src/index.css` (Dark Carbon/Zinc puro `#09090b` base, `#141416` tarjetas, textos níveos `#fafafa` y acento cian odontológico de alto contraste)
   - Soporte `darkMode: 'class'` en `frontend/tailwind.config.js`
-  - Componente `ThemeToggle` (Sol / Luna) en el header de `AppLayout` y en `AuthLayout`
-  - Persistencia de preferencia de tema (`light` | `dark` | `system`) en `localStorage`
-  - Tests: toggle conmuta clase `dark` en `document.documentElement` y persiste preferencia
+  - Componente accesible `ThemeToggle` moderno tipo switch cápsula deslizante con microinteracciones en `AppLayout` y `AuthLayout`
+  - Persistencia de preferencia (`light` | `dark` | `system`) en `localStorage` (`clinic-theme`) y escucha de cambios de sistema
+  - Tests: 9 tests unitarios y de integración con 100% de suites en verde
 - **Dependencias**: `C-13`, `C-14`, `C-15`
+- **Governance**: BAJO
+- **Leer antes**:
+  - `knowledge-base/08_arquitectura_propuesta.md` §Frontend
+
+### [C-20] `ui-responsive-accessibility` (Polish Responsive & Mobile Nav)
+- **Estado**: `[ ]` pendiente
+- **Scope**:
+  - Barra lateral colapsable / compactable en `AppLayout` (modo íconos compactos en tabletas y drawer hamburguesa accesible en móviles `< 768px`)
+  - Optimización responsiva de tablas de turnos y formularios clínicos (scroll horizontal contenido, tarjetas adaptativas en viewport angosto)
+  - Mejoras de accesibilidad móvil (touch targets >= 44x44px, navegación con teclado y cierre de menú al navegar)
+  - Tests: pruebas unitarias de colapso de sidebar, apertura/cierre de drawer y responsive breakpoints
+- **Dependencias**: `C-19`
 - **Governance**: BAJO
 - **Leer antes**:
   - `knowledge-base/08_arquitectura_propuesta.md` §Frontend

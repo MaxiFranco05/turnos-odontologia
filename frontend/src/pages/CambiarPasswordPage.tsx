@@ -196,8 +196,8 @@ export const CambiarPasswordPage: React.FC = () => {
         </div>
 
         {isProfileIncomplete && (
-          <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-4 space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-600">
+          <div className="rounded-lg border border-border bg-muted/40 p-4 space-y-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Completar Perfil de Paciente
             </h3>
             <Input

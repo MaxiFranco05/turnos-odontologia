@@ -134,10 +134,10 @@ export const OdontologoAgendaPage: React.FC<OdontologoAgendaPageProps> = ({
       {/* Encabezado del portal profesional */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Mi Agenda del Día (Odontólogo)
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-muted-foreground">
             {user?.nombre
               ? `Agenda clínica de ${user.nombre}. `
               : ''}
@@ -149,42 +149,42 @@ export const OdontologoAgendaPage: React.FC<OdontologoAgendaPageProps> = ({
 
       {/* Tarjetas de resumen diario */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-slate-200 bg-white">
+        <Card className="border-border bg-card">
           <CardContent className="p-4 pt-4">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Total del día
             </p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">
+            <p className="mt-1 text-2xl font-bold text-foreground">
               {stats.total}
             </p>
           </CardContent>
         </Card>
-        <Card className="border-emerald-200 bg-emerald-50/40">
+        <Card className="border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/50 dark:bg-emerald-950/20">
           <CardContent className="p-4 pt-4">
-            <p className="text-xs font-medium uppercase tracking-wider text-emerald-800">
+            <p className="text-xs font-medium uppercase tracking-wider text-emerald-800 dark:text-emerald-400">
               Confirmados por atender
             </p>
-            <p className="mt-1 text-2xl font-bold text-emerald-900">
+            <p className="mt-1 text-2xl font-bold text-emerald-900 dark:text-emerald-200">
               {stats.confirmados}
             </p>
           </CardContent>
         </Card>
-        <Card className="border-sky-200 bg-sky-50/40">
+        <Card className="border-sky-200 dark:border-sky-800/50 bg-sky-50/50 dark:bg-sky-950/20">
           <CardContent className="p-4 pt-4">
-            <p className="text-xs font-medium uppercase tracking-wider text-sky-800">
+            <p className="text-xs font-medium uppercase tracking-wider text-sky-800 dark:text-sky-400">
               Presentes
             </p>
-            <p className="mt-1 text-2xl font-bold text-sky-900">
+            <p className="mt-1 text-2xl font-bold text-sky-900 dark:text-sky-200">
               {stats.presentes}
             </p>
           </CardContent>
         </Card>
-        <Card className="border-rose-200 bg-rose-50/40">
+        <Card className="border-rose-200 dark:border-rose-800/50 bg-rose-50/50 dark:bg-rose-950/20">
           <CardContent className="p-4 pt-4">
-            <p className="text-xs font-medium uppercase tracking-wider text-rose-800">
+            <p className="text-xs font-medium uppercase tracking-wider text-rose-800 dark:text-rose-400">
               Ausentes
             </p>
-            <p className="mt-1 text-2xl font-bold text-rose-900">
+            <p className="mt-1 text-2xl font-bold text-rose-900 dark:text-rose-200">
               {stats.ausentes}
             </p>
           </CardContent>
@@ -293,12 +293,12 @@ export const OdontologoAgendaPage: React.FC<OdontologoAgendaPageProps> = ({
               Cargando tu agenda del día...
             </div>
           ) : filteredItems.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-200 py-10 text-center">
-              <Clock className="mx-auto h-8 w-8 text-slate-400" />
-              <p className="mt-2 text-sm font-medium text-slate-700">
+            <div className="rounded-lg border border-dashed border-border py-10 text-center">
+              <Clock className="mx-auto h-8 w-8 text-muted-foreground" />
+              <p className="mt-2 text-sm font-medium text-foreground">
                 No tenés turnos programados para la fecha seleccionada.
               </p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Probá eligiendo otra fecha operativa o cambiando el filtro de
                 estado.
               </p>
@@ -307,7 +307,7 @@ export const OdontologoAgendaPage: React.FC<OdontologoAgendaPageProps> = ({
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     <th className="py-3 pr-4">Horario</th>
                     <th className="px-4 py-3">Paciente</th>
                     <th className="px-4 py-3">Motivo / Prestación</th>
@@ -318,7 +318,7 @@ export const OdontologoAgendaPage: React.FC<OdontologoAgendaPageProps> = ({
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-border">
                   {filteredItems.map((turno) => {
                     const isConfirmado = turno.estado === 'confirmado';
                     const isRowMutating =
@@ -329,17 +329,17 @@ export const OdontologoAgendaPage: React.FC<OdontologoAgendaPageProps> = ({
                       <tr
                         key={turno.id}
                         data-testid={`dentist-agenda-row-${turno.id}`}
-                        className="transition-colors hover:bg-slate-50/80"
+                        className="transition-colors hover:bg-slate-100/60 dark:hover:bg-neutral-800/60"
                       >
-                        <td className="whitespace-nowrap py-3.5 pr-4 font-mono font-medium text-slate-900">
+                        <td className="whitespace-nowrap py-3.5 pr-4 font-mono font-medium text-foreground">
                           {formatTimeFromISO(turno.inicio)} –{' '}
                           {formatTimeFromISO(turno.fin)}
                         </td>
                         <td className="px-4 py-3.5">
-                          <div className="font-medium text-slate-900">
+                          <div className="font-medium text-foreground">
                             {turno.paciente.nombre}
                           </div>
-                          <div className="text-xs text-slate-500">
+                          <div className="text-xs text-muted-foreground">
                             {turno.paciente.nro_socio
                               ? `Socio: ${turno.paciente.nro_socio}`
                               : 'Sin N.º socio'}

@@ -223,10 +223,10 @@ export const RecepcionPlantillasPage: React.FC<RecepcionPlantillasPageProps> = (
     <div className="space-y-6">
       {/* Encabezado */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Plantillas de Disponibilidad Semanal
         </h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-muted-foreground">
           Configurá los bloques horarios recurrentes de cada odontólogo por día de la semana.
           El motor de disponibilidad rechazará automáticamente cualquier superposición horaria
           (permitiendo bloques adyacentes donde fin == inicio).
@@ -420,9 +420,9 @@ export const RecepcionPlantillasPage: React.FC<RecepcionPlantillasPageProps> = (
                   Cargando plantillas de disponibilidad...
                 </div>
               ) : items.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-slate-200 py-10 text-center">
-                  <Filter className="mx-auto h-8 w-8 text-slate-400" />
-                  <p className="mt-2 text-sm font-medium text-slate-700">
+                <div className="rounded-lg border border-dashed border-border py-10 text-center">
+                  <Filter className="mx-auto h-8 w-8 text-muted-foreground" />
+                  <p className="mt-2 text-sm font-medium text-foreground">
                     No hay plantillas horarias registradas para este criterio.
                   </p>
                 </div>
@@ -436,13 +436,13 @@ export const RecepcionPlantillasPage: React.FC<RecepcionPlantillasPageProps> = (
                     return (
                       <div
                         key={dayIdx}
-                        className="rounded-lg border border-slate-200 bg-slate-50/50 p-4"
+                        className="rounded-lg border border-border bg-muted/40 dark:bg-neutral-900/60 p-4"
                       >
                         <div className="mb-3 flex items-center justify-between">
-                          <h4 className="text-sm font-semibold text-slate-900">
+                          <h4 className="text-sm font-semibold text-foreground">
                             {dayLabel}
                           </h4>
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs text-muted-foreground">
                             {dayItems.length}{' '}
                             {dayItems.length === 1 ? 'bloque' : 'bloques'}
                           </span>
@@ -455,11 +455,11 @@ export const RecepcionPlantillasPage: React.FC<RecepcionPlantillasPageProps> = (
                               <div
                                 key={plantilla.id}
                                 data-testid={`plantilla-item-${plantilla.id}`}
-                                className="flex flex-col justify-between gap-3 rounded-md border border-slate-200 bg-white p-3 shadow-sm sm:flex-row sm:items-center"
+                                className="flex flex-col justify-between gap-3 rounded-md border border-border bg-card p-3 shadow-sm sm:flex-row sm:items-center"
                               >
                                 <div className="space-y-1">
                                   <div className="flex flex-wrap items-center gap-2">
-                                    <span className="inline-flex items-center gap-1 font-semibold text-slate-900">
+                                    <span className="inline-flex items-center gap-1 font-semibold text-foreground">
                                       <Clock className="h-3.5 w-3.5 text-primary" />
                                       {normalizeTimeHHMM(plantilla.hora_inicio)} –{' '}
                                       {normalizeTimeHHMM(plantilla.hora_fin)}
@@ -471,7 +471,7 @@ export const RecepcionPlantillasPage: React.FC<RecepcionPlantillasPageProps> = (
                                       Odontólogo #{plantilla.odontologo_id}
                                     </Badge>
                                   </div>
-                                  <p className="text-sm text-slate-600">
+                                  <p className="text-sm text-muted-foreground">
                                     {plantilla.prestacion}
                                   </p>
                                 </div>

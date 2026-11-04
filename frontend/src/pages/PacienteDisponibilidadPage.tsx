@@ -140,10 +140,10 @@ export const PacienteDisponibilidadPage: React.FC<
       {/* Encabezado clínico del paciente */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Reserva de Turnos Online
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-muted-foreground">
             Buscá horarios libres con tu profesional y solicitá tu turno al instante.
           </p>
         </div>
@@ -312,12 +312,12 @@ export const PacienteDisponibilidadPage: React.FC<
               Consultando horarios disponibles...
             </div>
           ) : slots.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-200 py-10 text-center">
-              <Clock className="mx-auto h-8 w-8 text-slate-400" />
-              <p className="mt-2 text-sm font-medium text-slate-700">
+            <div className="rounded-lg border border-dashed border-border py-10 text-center">
+              <Clock className="mx-auto h-8 w-8 text-muted-foreground" />
+              <p className="mt-2 text-sm font-medium text-foreground">
                 No hay turnos disponibles para la fecha u odontólogo seleccionado.
               </p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Probá seleccionando otro profesional o una fecha posterior.
               </p>
             </div>
@@ -334,12 +334,12 @@ export const PacienteDisponibilidadPage: React.FC<
                     data-testid={`slot-card-${index}`}
                     className={`flex flex-col justify-between rounded-lg border p-4 transition-all ${
                       isSelected
-                        ? 'border-primary bg-primary/5 shadow-sm'
-                        : 'border-slate-200 bg-white hover:border-slate-300'
+                        ? 'border-primary bg-primary/10 shadow-sm'
+                        : 'border-border bg-card hover:border-slate-500'
                     }`}
                   >
                     <div>
-                      <div className="font-mono text-base font-bold text-slate-900">
+                      <div className="font-mono text-base font-bold text-foreground">
                         {formatTimeFromISO(slot.inicio)} –{' '}
                         {formatTimeFromISO(slot.fin)}
                       </div>

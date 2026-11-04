@@ -135,10 +135,10 @@ export const PacienteMisTurnosPage: React.FC = () => {
       {/* Encabezado clínico */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Mis Turnos Odontológicos
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-muted-foreground">
             Consultá tu historial de turnos y gestioná cancelaciones con al menos 24 horas de anticipación.
           </p>
         </div>
@@ -146,36 +146,36 @@ export const PacienteMisTurnosPage: React.FC = () => {
 
       {/* Tarjetas de resumen */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-slate-200 bg-white">
+        <Card className="border-border bg-card">
           <CardContent className="p-4 pt-4">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Total de turnos
             </p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">{stats.total}</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">{stats.total}</p>
           </CardContent>
         </Card>
-        <Card className="border-amber-200 bg-amber-50/40">
+        <Card className="border-amber-200 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-950/20">
           <CardContent className="p-4 pt-4">
-            <p className="text-xs font-medium uppercase tracking-wider text-amber-800">
+            <p className="text-xs font-medium uppercase tracking-wider text-amber-800 dark:text-amber-400">
               Pendientes de confirmación
             </p>
-            <p className="mt-1 text-2xl font-bold text-amber-900">{stats.pendientes}</p>
+            <p className="mt-1 text-2xl font-bold text-amber-900 dark:text-amber-200">{stats.pendientes}</p>
           </CardContent>
         </Card>
-        <Card className="border-emerald-200 bg-emerald-50/40">
+        <Card className="border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/50 dark:bg-emerald-950/20">
           <CardContent className="p-4 pt-4">
-            <p className="text-xs font-medium uppercase tracking-wider text-emerald-800">
+            <p className="text-xs font-medium uppercase tracking-wider text-emerald-800 dark:text-emerald-400">
               Confirmados
             </p>
-            <p className="mt-1 text-2xl font-bold text-emerald-900">{stats.confirmados}</p>
+            <p className="mt-1 text-2xl font-bold text-emerald-900 dark:text-emerald-200">{stats.confirmados}</p>
           </CardContent>
         </Card>
-        <Card className="border-slate-200 bg-slate-50">
+        <Card className="border-border bg-muted/30">
           <CardContent className="p-4 pt-4">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-600">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Cancelados / Anulados
             </p>
-            <p className="mt-1 text-2xl font-bold text-slate-700">{stats.cancelados}</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">{stats.cancelados}</p>
           </CardContent>
         </Card>
       </div>
@@ -288,12 +288,12 @@ export const PacienteMisTurnosPage: React.FC = () => {
               Cargando tus turnos...
             </div>
           ) : filteredItems.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-200 py-10 text-center">
-              <Clock className="mx-auto h-8 w-8 text-slate-400" />
-              <p className="mt-2 text-sm font-medium text-slate-700">
+            <div className="rounded-lg border border-dashed border-border py-10 text-center">
+              <Clock className="mx-auto h-8 w-8 text-muted-foreground" />
+              <p className="mt-2 text-sm font-medium text-foreground">
                 No tenés turnos registrados con los filtros seleccionados.
               </p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Podés solicitar uno nuevo desde la sección "Buscar turno".
               </p>
             </div>
@@ -301,7 +301,7 @@ export const PacienteMisTurnosPage: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     <th className="py-3 pr-4">Fecha y Horario</th>
                     <th className="px-4 py-3">Odontólogo</th>
                     <th className="px-4 py-3">Motivo</th>
@@ -310,7 +310,7 @@ export const PacienteMisTurnosPage: React.FC = () => {
                     <th className="py-3 pl-4 text-right">Acción</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-border">
                   {filteredItems.map((turno) => {
                     const canCancel =
                       turno.estado === 'solicitado' ||
@@ -322,27 +322,27 @@ export const PacienteMisTurnosPage: React.FC = () => {
                       <tr
                         key={turno.id}
                         data-testid={`mis-turnos-row-${turno.id}`}
-                        className="transition-colors hover:bg-slate-50/80"
+                        className="transition-colors hover:bg-slate-100/60 dark:hover:bg-neutral-800/60"
                       >
-                        <td className="whitespace-nowrap py-3.5 pr-4 font-medium text-slate-900">
+                        <td className="whitespace-nowrap py-3.5 pr-4 font-medium text-foreground">
                           <div>{formatDateDisplay(turno.inicio)}</div>
-                          <div className="font-mono text-xs text-slate-500">
+                          <div className="font-mono text-xs text-muted-foreground">
                             {formatTimeFromISO(turno.inicio)} –{' '}
                             {formatTimeFromISO(turno.fin)}
                           </div>
                         </td>
                         <td className="px-4 py-3.5">
-                          <div className="flex items-center gap-1.5 font-medium text-slate-800">
-                            <Stethoscope className="h-3.5 w-3.5 text-slate-400" />
+                          <div className="flex items-center gap-1.5 font-medium text-foreground">
+                            <Stethoscope className="h-3.5 w-3.5 text-muted-foreground" />
                             <span>{turno.odontologo.nombre}</span>
                           </div>
                           {turno.odontologo.email && (
-                            <div className="text-xs text-slate-500">
+                            <div className="text-xs text-muted-foreground">
                               {turno.odontologo.email}
                             </div>
                           )}
                         </td>
-                        <td className="px-4 py-3.5 text-slate-700">
+                        <td className="px-4 py-3.5 text-slate-700 dark:text-neutral-300">
                           {turno.motivo}
                         </td>
                         <td className="px-4 py-3.5">

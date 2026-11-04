@@ -5,12 +5,21 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { describe, it, expect, vi } from 'vitest';
 import { AppLayout } from './AppLayout';
 import { AuthLayout } from './AuthLayout';
+import { ThemeProvider } from '@/context/ThemeContext';
 import type { UserProfile } from '@/types/auth';
+
+function renderWithProviders(ui: React.ReactElement) {
+  return render(
+    <ThemeProvider defaultTheme="light">
+      {ui}
+    </ThemeProvider>
+  );
+}
 
 describe('Layouts Architecture (Strict TDD)', () => {
   describe('AuthLayout', () => {
     it('renders clinic branding and children content', () => {
-      render(
+      renderWithProviders(
         <MemoryRouter initialEntries={['/login']}>
           <Routes>
             <Route element={<AuthLayout />}>
@@ -21,6 +30,7 @@ describe('Layouts Architecture (Strict TDD)', () => {
       );
       expect(screen.getByText(/turnos odontología/i)).toBeInTheDocument();
       expect(screen.getByText(/formulario de login/i)).toBeInTheDocument();
+      expect(screen.getByRole('switch', { name: /cambiar a modo/i })).toBeInTheDocument();
     });
   });
 
@@ -34,7 +44,7 @@ describe('Layouts Architecture (Strict TDD)', () => {
         rol: 'recepcion',
       };
 
-      render(
+      renderWithProviders(
         <MemoryRouter initialEntries={['/recepcion/agenda']}>
           <Routes>
             <Route element={<AppLayout user={recepcionista} onLogout={vi.fn()} />}>
@@ -49,6 +59,7 @@ describe('Layouts Architecture (Strict TDD)', () => {
       expect(screen.getByRole('link', { name: /agenda del día/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /plantillas/i })).toBeInTheDocument();
       expect(screen.queryByRole('link', { name: /mi agenda/i })).not.toBeInTheDocument();
+      expect(screen.getByRole('switch', { name: /cambiar a modo/i })).toBeInTheDocument();
     });
 
     it('renders dentist navigation with Mi agenda link only', () => {
@@ -60,7 +71,7 @@ describe('Layouts Architecture (Strict TDD)', () => {
         rol: 'odontologo',
       };
 
-      render(
+      renderWithProviders(
         <MemoryRouter initialEntries={['/odontologo/agenda']}>
           <Routes>
             <Route element={<AppLayout user={odontologo} onLogout={vi.fn()} />}>
@@ -74,6 +85,7 @@ describe('Layouts Architecture (Strict TDD)', () => {
       expect(screen.getByText(/odontólogo/i)).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /mi agenda/i })).toBeInTheDocument();
       expect(screen.queryByRole('link', { name: /plantillas/i })).not.toBeInTheDocument();
+      expect(screen.getByRole('switch', { name: /cambiar a modo/i })).toBeInTheDocument();
     });
 
     it('renders patient navigation with Buscar turno and Mis turnos links', () => {
@@ -85,7 +97,7 @@ describe('Layouts Architecture (Strict TDD)', () => {
         rol: 'paciente',
       };
 
-      render(
+      renderWithProviders(
         <MemoryRouter initialEntries={['/paciente/mis-turnos']}>
           <Routes>
             <Route element={<AppLayout user={paciente} onLogout={vi.fn()} />}>
@@ -99,6 +111,7 @@ describe('Layouts Architecture (Strict TDD)', () => {
       expect(screen.getByText(/paciente/i)).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /buscar turno/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /mis turnos/i })).toBeInTheDocument();
+      expect(screen.getByRole('switch', { name: /cambiar a modo/i })).toBeInTheDocument();
     });
 
     it('triggers onLogout when Cerrar sesión button is clicked', async () => {
@@ -111,7 +124,7 @@ describe('Layouts Architecture (Strict TDD)', () => {
         rol: 'recepcion',
       };
 
-      render(
+      renderWithProviders(
         <MemoryRouter>
           <AppLayout user={user} onLogout={handleLogout} />
         </MemoryRouter>

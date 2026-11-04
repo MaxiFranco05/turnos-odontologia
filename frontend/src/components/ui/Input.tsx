@@ -23,7 +23,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             htmlFor={inputId}
             className={cn(
               'block text-sm font-medium leading-none',
-              error ? 'text-destructive' : 'text-slate-700'
+              error ? 'text-destructive' : 'text-slate-700 dark:text-slate-200'
             )}
           >
             {label}
