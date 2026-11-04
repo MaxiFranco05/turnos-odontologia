@@ -316,7 +316,7 @@ C-01 foundation-setup
   - `knowledge-base/08_arquitectura_propuesta.md` §Frontend
 
 ### [C-13] `patient-features`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-03)
 - **Scope**:
   - Página `/paciente/disponibilidad` — selector odontólogo + fecha (calendario), llama `GET /api/disponibilidad`, muestra grid de huecos libres
   - Página `/paciente/solicitar/:slotId` — modal confirmación con campo `motivo`, `POST /api/turnos`

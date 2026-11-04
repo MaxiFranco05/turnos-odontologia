@@ -7,6 +7,8 @@ import CambiarPasswordPage from '@/pages/CambiarPasswordPage';
 import RecepcionAgendaPage from '@/pages/RecepcionAgendaPage';
 import RecepcionPlantillasPage from '@/pages/RecepcionPlantillasPage';
 import OdontologoAgendaPage from '@/pages/OdontologoAgendaPage';
+import PacienteDisponibilidadPage from '@/pages/PacienteDisponibilidadPage';
+import PacienteMisTurnosPage from '@/pages/PacienteMisTurnosPage';
 
 export const router = createBrowserRouter([
   // Public authentication & mandatory password change routes (C-04 / C-12)
@@ -53,25 +55,11 @@ export const router = createBrowserRouter([
           // Paciente (C-13)
           {
             path: 'paciente/disponibilidad',
-            element: (
-              <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-bold text-slate-900">Reserva de Turnos (Paciente)</h2>
-                <p className="mt-2 text-slate-600">
-                  Módulo de búsqueda de huecos disponibles y solicitud online (a implementar en C-13).
-                </p>
-              </div>
-            ),
+            element: <PacienteDisponibilidadPage />,
           },
           {
             path: 'paciente/mis-turnos',
-            element: (
-              <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-bold text-slate-900">Mis Turnos (Paciente)</h2>
-                <p className="mt-2 text-slate-600">
-                  Módulo de historial y cancelación con anticipación mínima (a implementar en C-13).
-                </p>
-              </div>
-            ),
+            element: <PacienteMisTurnosPage />,
           },
         ],
       },
