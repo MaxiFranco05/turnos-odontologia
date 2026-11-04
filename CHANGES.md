@@ -346,7 +346,7 @@ C-01 foundation-setup
   - `knowledge-base/08_arquitectura_propuesta.md` §Estructura de directorios frontend
 
 ### [C-15] `dentist-features`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-03)
 - **Scope**:
   - Página `/odontologo/agenda` — vista día (selector fecha), lista solo sus turnos con paciente, hora, motivo, estado
   - Acciones por fila: "Marcar presente" / "Marcar ausente" (si `confirmado`) → `PATCH /api/turnos/{id}` (`{"estado": "presente" | "ausente"}`)

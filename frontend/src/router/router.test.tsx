@@ -146,6 +146,8 @@ describe('Router & ProtectedRoute (Strict TDD)', () => {
 
     expect(serializedRoutes).toContain('RecepcionAgendaPage');
     expect(serializedRoutes).toContain('RecepcionPlantillasPage');
+    expect(serializedRoutes).toContain('OdontologoAgendaPage');
     expect(serializedRoutes).not.toContain('a implementar en C-14');
+    expect(serializedRoutes).not.toContain('a implementar en C-15');
   });
 });

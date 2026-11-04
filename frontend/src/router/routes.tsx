@@ -6,6 +6,7 @@ import LoginPage from '@/pages/LoginPage';
 import CambiarPasswordPage from '@/pages/CambiarPasswordPage';
 import RecepcionAgendaPage from '@/pages/RecepcionAgendaPage';
 import RecepcionPlantillasPage from '@/pages/RecepcionPlantillasPage';
+import OdontologoAgendaPage from '@/pages/OdontologoAgendaPage';
 
 export const router = createBrowserRouter([
   // Public authentication & mandatory password change routes (C-04 / C-12)
@@ -47,14 +48,7 @@ export const router = createBrowserRouter([
           // Odontólogo (C-15)
           {
             path: 'odontologo/agenda',
-            element: (
-              <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-bold text-slate-900">Mi Agenda (Odontólogo)</h2>
-                <p className="mt-2 text-slate-600">
-                  Módulo de turnos del día y marcado de presente/ausente (a implementar en C-15).
-                </p>
-              </div>
-            ),
+            element: <OdontologoAgendaPage />,
           },
           // Paciente (C-13)
           {
