@@ -1,10 +1,10 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider, AuthContext } from '@/context/AuthContext';
+import { AuthProvider } from '@/context/AuthContext';
 import LoginPage from './LoginPage';
 import * as authService from '@/services/authService';
 import type { TokenResponsePayload, UserProfile } from '@/types/auth';
@@ -51,6 +51,22 @@ describe('LoginPage (Strict TDD)', () => {
     expect(screen.getByLabelText(/^contraseña/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/recordar/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /iniciar sesión/i })).toBeInTheDocument();
+  });
+
+  it('renders demo credential quick access chips and populates form fields on click', async () => {
+    const user = userEvent.setup();
+    renderLoginPage();
+
+    const recepcionChip = screen.getByRole('button', { name: /demo recepción/i });
+    expect(recepcionChip).toBeInTheDocument();
+
+    await user.click(recepcionChip);
+
+    const idInput = screen.getByLabelText(/correo o n\.?º de socio/i) as HTMLInputElement;
+    const passInput = screen.getByLabelText(/^contraseña/i) as HTMLInputElement;
+
+    expect(idInput.value).toBe('recepcion@clinica.com');
+    expect(passInput.value).toBe('Recepcion123');
   });
 
   it('validates empty identifier and password client-side before sending request', async () => {

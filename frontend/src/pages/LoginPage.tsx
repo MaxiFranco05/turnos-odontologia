@@ -1,12 +1,36 @@
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert, AlertDescription } from '@/components/ui/Alert';
 import { useOptionalAuth } from '@/context/AuthContext';
 import { useLoginMutation } from '@/hooks/useAuthMutations';
 import { getDefaultRouteForUser } from '@/types/auth';
+
+const DEMO_ACCOUNTS = [
+  {
+    role: 'recepcion',
+    title: 'Demo Recepción',
+    sub: 'Camila',
+    identificador: 'recepcion@clinica.com',
+    password: 'Recepcion123',
+  },
+  {
+    role: 'odontologo',
+    title: 'Demo Odontólogo',
+    sub: 'Dr. Ruiz',
+    identificador: 'martin.ruiz@clinica.com',
+    password: 'Odontologo123',
+  },
+  {
+    role: 'paciente',
+    title: 'Demo Paciente',
+    sub: 'Lucía G.',
+    identificador: 'lucia.gomez@gmail.com',
+    password: 'Paciente123',
+  },
+];
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,6 +51,13 @@ export const LoginPage: React.FC = () => {
   if (auth?.user) {
     return <Navigate to={getDefaultRouteForUser(auth.user)} replace />;
   }
+
+  const handleFillDemo = (demo: typeof DEMO_ACCOUNTS[number]) => {
+    setIdentificador(demo.identificador);
+    setPassword(demo.password);
+    setValidationErrors({});
+    setErrorMessage(null);
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -79,10 +110,10 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 text-left">
-      <div className="space-y-1">
-        <h2 className="text-xl font-semibold tracking-tight text-slate-900">Iniciar Sesión</h2>
-        <p className="text-sm text-slate-500">
+    <div className="space-y-4 sm:space-y-6 text-left">
+      <div className="space-y-0.5 sm:space-y-1">
+        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-zinc-50">Iniciar Sesión</h2>
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
           Ingrese sus credenciales para acceder a la gestión de turnos odontológicos.
         </p>
       </div>
@@ -93,7 +124,7 @@ export const LoginPage: React.FC = () => {
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+      <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4" noValidate>
         <div>
           <Input
             id="identificador"
@@ -134,7 +165,7 @@ export const LoginPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-[34px] text-slate-400 hover:text-slate-600 focus:outline-none"
+            className="absolute right-3 top-[34px] text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 focus:outline-none"
             aria-label={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
             tabIndex={-1}
           >
@@ -142,15 +173,15 @@ export const LoginPage: React.FC = () => {
           </button>
         </div>
 
-        <div className="flex items-center justify-between pt-1">
-          <label className="flex items-center space-x-2 text-sm text-slate-600 cursor-pointer select-none">
+        <div className="flex items-center justify-between pt-0.5 sm:pt-1">
+          <label className="flex items-center space-x-2 text-xs sm:text-sm text-slate-600 dark:text-zinc-400 cursor-pointer select-none">
             <input
               type="checkbox"
               id="remember"
               checked={remember}
               onChange={(e) => setRemember(e.target.checked)}
               disabled={loginMutation.isPending}
-              className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+              className="h-4 w-4 rounded border-slate-300 dark:border-zinc-700 text-primary focus:ring-primary"
             />
             <span>Recordar en este equipo</span>
           </label>
@@ -160,11 +191,33 @@ export const LoginPage: React.FC = () => {
           type="submit"
           loading={loginMutation.isPending}
           disabled={loginMutation.isPending}
-          className="w-full active:scale-[0.98] transition-transform duration-150 ease-out"
+          className="w-full active:scale-[0.96] transition-transform duration-150 ease-out flex items-center justify-center gap-2 rounded-xl py-2.5 font-semibold"
         >
-          Iniciar Sesión
+          <span>Iniciar Sesión</span>
+          <ArrowRight className="h-4 w-4" />
         </Button>
       </form>
+
+      {/* Quick 1-Click Access Pill Selector */}
+      <div className="mt-4 sm:mt-6 pt-3.5 sm:pt-5 border-t border-slate-200/60 dark:border-zinc-800/80">
+        <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block mb-2 text-center">
+          Acceso Rápido de Demostración
+        </span>
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+          {DEMO_ACCOUNTS.map((demo) => (
+            <button
+              key={demo.role}
+              type="button"
+              onClick={() => handleFillDemo(demo)}
+              className="p-1.5 sm:p-2 rounded-xl bg-slate-100/80 dark:bg-zinc-800/80 hover:bg-cyan-50 dark:hover:bg-cyan-950/40 border border-transparent hover:border-cyan-200 dark:hover:border-cyan-800 text-slate-700 dark:text-zinc-300 active:scale-[0.96] transition-all text-center flex flex-col items-center justify-center"
+              aria-label={demo.title}
+            >
+              <span className="font-semibold text-[10px] sm:text-[11px] block">{demo.title.replace('Demo ', '')}</span>
+              <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-zinc-500 block">{demo.sub}</span>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

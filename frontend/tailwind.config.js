@@ -8,34 +8,34 @@ export default {
   theme: {
     extend: {
       colors: {
-        border: "hsl(var(--border, 214.3 31.8% 91.4%))",
-        input: "hsl(var(--input, 214.3 31.8% 91.4%))",
-        ring: "hsl(var(--ring, 201 96% 32%))",
-        background: "hsl(var(--background, 0 0% 100%))",
-        foreground: "hsl(var(--foreground, 222.2 84% 4.9%))",
+        border: "hsl(var(--border) / <alpha-value>)",
+        input: "hsl(var(--input) / <alpha-value>)",
+        ring: "hsl(var(--ring) / <alpha-value>)",
+        background: "hsl(var(--background) / <alpha-value>)",
+        foreground: "hsl(var(--foreground) / <alpha-value>)",
         primary: {
-          DEFAULT: "hsl(var(--primary, 199 89% 48%))",
-          foreground: "hsl(var(--primary-foreground, 210 40% 98%))",
+          DEFAULT: "hsl(var(--primary) / <alpha-value>)",
+          foreground: "hsl(var(--primary-foreground) / <alpha-value>)",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary, 210 40% 96.1%))",
-          foreground: "hsl(var(--secondary-foreground, 222.2 47.4% 11.2%))",
+          DEFAULT: "hsl(var(--secondary) / <alpha-value>)",
+          foreground: "hsl(var(--secondary-foreground) / <alpha-value>)",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive, 0 84.2% 60.2%))",
-          foreground: "hsl(var(--destructive-foreground, 210 40% 98%))",
+          DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
+          foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted, 210 40% 96.1%))",
-          foreground: "hsl(var(--muted-foreground, 215.4 16.3% 46.9%))",
+          DEFAULT: "hsl(var(--muted) / <alpha-value>)",
+          foreground: "hsl(var(--muted-foreground) / <alpha-value>)",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent, 210 40% 96.1%))",
-          foreground: "hsl(var(--accent-foreground, 222.2 47.4% 11.2%))",
+          DEFAULT: "hsl(var(--accent) / <alpha-value>)",
+          foreground: "hsl(var(--accent-foreground) / <alpha-value>)",
         },
         card: {
-          DEFAULT: "hsl(var(--card, 0 0% 100%))",
-          foreground: "hsl(var(--card-foreground, 222.2 84% 4.9%))",
+          DEFAULT: "hsl(var(--card) / <alpha-value>)",
+          foreground: "hsl(var(--card-foreground) / <alpha-value>)",
         },
       },
       borderRadius: {

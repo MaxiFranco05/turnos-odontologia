@@ -407,7 +407,7 @@ C-01 foundation-setup
   - `knowledge-base/08_arquitectura_propuesta.md` §Frontend
 
 ### [C-20] `ui-responsive-accessibility` (Polish Responsive & Mobile Nav)
-- **Estado**: `[ ]` pendiente
+- **Estado**: [x] completado (archivado 2026-11-04)
 - **Scope**:
   - Barra lateral colapsable / compactable en `AppLayout` (modo íconos compactos en tabletas y drawer hamburguesa accesible en móviles `< 768px`)
   - Optimización responsiva de tablas de turnos y formularios clínicos (scroll horizontal contenido, tarjetas adaptativas en viewport angosto)

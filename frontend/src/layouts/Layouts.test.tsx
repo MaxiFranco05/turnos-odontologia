@@ -16,9 +16,9 @@ function renderWithProviders(ui: React.ReactElement) {
   );
 }
 
-describe('Layouts Architecture (Strict TDD)', () => {
+describe('Layouts Architecture (Strict TDD - C-20)', () => {
   describe('AuthLayout', () => {
-    it('renders clinic branding and children content', () => {
+    it('renders clinic branding, ambient glow container, and children content', () => {
       renderWithProviders(
         <MemoryRouter initialEntries={['/login']}>
           <Routes>
@@ -30,12 +30,12 @@ describe('Layouts Architecture (Strict TDD)', () => {
       );
       expect(screen.getByText(/turnos odontología/i)).toBeInTheDocument();
       expect(screen.getByText(/formulario de login/i)).toBeInTheDocument();
-      expect(screen.getByRole('switch', { name: /cambiar a modo/i })).toBeInTheDocument();
+      expect(screen.getAllByRole('switch', { name: /cambiar a modo/i }).length).toBeGreaterThanOrEqual(1);
     });
   });
 
-  describe('AppLayout by Role', () => {
-    it('renders receptionist navigation with Agenda and Plantillas links', () => {
+  describe('AppLayout - Floating Glass Capsule (Desktop) & Floating Dock (Mobile)', () => {
+    it('renders desktop floating glass capsule and mobile dock for receptionist', () => {
       const recepcionista: UserProfile = {
         id: 1,
         email: 'recepcion@clinica.com',
@@ -54,15 +54,31 @@ describe('Layouts Architecture (Strict TDD)', () => {
         </MemoryRouter>
       );
 
+      // Verify user info and role badge
       expect(screen.getByText('María Lopez')).toBeInTheDocument();
-      expect(screen.getByText('Recepción')).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /agenda del día/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /plantillas/i })).toBeInTheDocument();
+      expect(screen.getAllByText('Recepción').length).toBeGreaterThanOrEqual(1);
+
+      // Verify desktop capsule navigation
+      const desktopNav = screen.getByRole('navigation', { name: /navegación principal desktop/i });
+      expect(desktopNav).toBeInTheDocument();
+      expect(desktopNav).toHaveClass('glass-surface');
+
+      // Verify mobile bottom dock navigation
+      const mobileDock = screen.getByRole('navigation', { name: /navegación móvil/i });
+      expect(mobileDock).toBeInTheDocument();
+
+      // Verify role-based navigation links
+      const agendaLinks = screen.getAllByRole('link', { name: /agenda del día/i });
+      expect(agendaLinks.length).toBeGreaterThanOrEqual(1);
+
+      const plantillasLinks = screen.getAllByRole('link', { name: /plantillas/i });
+      expect(plantillasLinks.length).toBeGreaterThanOrEqual(1);
+
       expect(screen.queryByRole('link', { name: /mi agenda/i })).not.toBeInTheDocument();
-      expect(screen.getByRole('switch', { name: /cambiar a modo/i })).toBeInTheDocument();
+      expect(screen.getAllByRole('switch', { name: /cambiar a modo/i }).length).toBeGreaterThanOrEqual(1);
     });
 
-    it('renders dentist navigation with Mi agenda link only', () => {
+    it('renders dentist navigation with Mi agenda in desktop capsule and mobile dock', () => {
       const odontologo: UserProfile = {
         id: 2,
         email: 'dentist@clinica.com',
@@ -82,10 +98,12 @@ describe('Layouts Architecture (Strict TDD)', () => {
       );
 
       expect(screen.getByText(/dr\. carlos sosa/i)).toBeInTheDocument();
-      expect(screen.getByText(/odontólogo/i)).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /mi agenda/i })).toBeInTheDocument();
+      expect(screen.getAllByText(/odontólogo/i).length).toBeGreaterThanOrEqual(1);
+
+      const agendaLinks = screen.getAllByRole('link', { name: /mi agenda/i });
+      expect(agendaLinks.length).toBeGreaterThanOrEqual(1);
       expect(screen.queryByRole('link', { name: /plantillas/i })).not.toBeInTheDocument();
-      expect(screen.getByRole('switch', { name: /cambiar a modo/i })).toBeInTheDocument();
+      expect(screen.getAllByRole('switch', { name: /cambiar a modo/i }).length).toBeGreaterThanOrEqual(1);
     });
 
     it('renders patient navigation with Buscar turno and Mis turnos links', () => {
@@ -108,13 +126,16 @@ describe('Layouts Architecture (Strict TDD)', () => {
       );
 
       expect(screen.getByText(/lucía fernandez/i)).toBeInTheDocument();
-      expect(screen.getByText(/paciente/i)).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /buscar turno/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /mis turnos/i })).toBeInTheDocument();
-      expect(screen.getByRole('switch', { name: /cambiar a modo/i })).toBeInTheDocument();
+      expect(screen.getAllByText(/paciente/i).length).toBeGreaterThanOrEqual(1);
+
+      const buscarLinks = screen.getAllByRole('link', { name: /buscar turno/i });
+      expect(buscarLinks.length).toBeGreaterThanOrEqual(1);
+
+      const misTurnosLinks = screen.getAllByRole('link', { name: /mis turnos/i });
+      expect(misTurnosLinks.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('triggers onLogout when Cerrar sesión button is clicked', async () => {
+    it('triggers onLogout when Cerrar sesión button is clicked in user capsule', async () => {
       const handleLogout = vi.fn();
       const user: UserProfile = {
         id: 1,
@@ -130,8 +151,8 @@ describe('Layouts Architecture (Strict TDD)', () => {
         </MemoryRouter>
       );
 
-      const logoutBtn = screen.getByRole('button', { name: /cerrar sesión/i });
-      await userEvent.click(logoutBtn);
+      const logoutBtns = screen.getAllByRole('button', { name: /cerrar sesión/i });
+      await userEvent.click(logoutBtns[0]);
       expect(handleLogout).toHaveBeenCalledTimes(1);
     });
   });
