@@ -381,7 +381,7 @@ C-01 foundation-setup
   - `knowledge-base/10_preguntas_abiertas.md` §Media-1
 
 ### [C-17] `docker-compose-prod`
-- **Estado**: `[ ]` pendiente
+- **Estado**: [x] completado (archivado 2026-11-05)
 - **Scope**:
   - `docker-compose.prod.yml`: api (gunicorn + workers), postgres, nginx reverse proxy, certbot (opcional)
   - Variables de entorno separadas `.env.prod` (secrets fuera del repo)

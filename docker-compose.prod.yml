@@ -1,0 +1,97 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: turnos-odontologia-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-turnos_odontologia_prod}
+      POSTGRES_USER: ${POSTGRES_USER:-turnos_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_prod_secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-turnos_user} -d ${POSTGRES_DB:-turnos_odontologia_prod}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 128M
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: turnos-odontologia-api-prod
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      APP_NAME: "Turnos Odontología API"
+      DEBUG: "false"
+      HOST: "0.0.0.0"
+      PORT: 8000
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://turnos_user:postgres_prod_secret@postgres:5432/turnos_odontologia_prod}
+      JWT_SECRET: ${JWT_SECRET:-supersecretkey_change_in_production_min_32_chars_long}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-60}
+      CANCEL_MIN_HOURS: ${CANCEL_MIN_HOURS:-24}
+      TIMEZONE: ${TIMEZONE:-America/Argentina/Buenos_Aires}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 128M
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: turnos-odontologia-frontend-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:80/healthz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+        reservations:
+          memory: 32M
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
