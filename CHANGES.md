@@ -419,7 +419,7 @@ C-01 foundation-setup
   - `knowledge-base/08_arquitectura_propuesta.md` §Frontend
 
 ### [C-18] `testing-core`
-- **Estado**: `[ ]` pendiente
+- **Estado**: [x] completado (archivado 2026-11-05)
 - **Scope**:
   - Tests unitarios: repositorios, servicios de disponibilidad, máquina de estados
   - Tests de integración: flujos E2E API (login → solicitar → confirmar → marcar presente)

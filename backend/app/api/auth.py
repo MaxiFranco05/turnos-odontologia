@@ -179,7 +179,7 @@ async def _execute_mandatory_password_change(
     )
 
 
-@router.post("/cambiar-password", response_model=TokenResponse)
+@router.post("/cambiar-password", response_model=TokenResponse, deprecated=True)
 async def cambiar_password(
     payload: ChangePasswordRequest,
     request: Request,
