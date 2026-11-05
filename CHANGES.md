@@ -364,7 +364,7 @@ C-01 foundation-setup
 ## FASE 6 — Polish & Production Readiness
 
 ### [C-16] `seed-data-script`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado 2026-11-05)
 - **Scope**:
   - Script `scripts/seed.py` (o management command) que carga:
     - Catálogo de estados de turno (id, nombre, descripción)
