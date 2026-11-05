@@ -19,9 +19,9 @@ Sistema de gestión de turnos y agenda de pacientes para consultorios odontológ
 
 ## 📌 Estado del Proyecto y Alcance Alcanzado (TPI)
 
-El proyecto cuenta con **17 changes completados, verificados y archivados** bajo estricto ciclo SDD (superando ampliamente el mínimo de 6 changes exigidos para 3 integrantes), cubriendo la totalidad del camino crítico de Backend y Frontend:
+El proyecto cuenta con **20 changes completados, verificados y archivados (100% del roadmap)** bajo estricto ciclo SDD (superando ampliamente el mínimo de 6 changes exigidos para 3 integrantes), cubriendo la totalidad del camino crítico de Backend, Frontend, DevOps y Testing:
 
-### ✅ Changes Completados y Archivados (17)
+### ✅ Changes Completados y Archivados (20)
 * **`C-01` foundation-setup**: Estructura en capas, Docker Compose, Alembic y baseline.
 * **`C-02` core-models**: Modelos SQLAlchemy (Usuario, Rol, Turno, Estado, Plantilla) y migraciones.
 * **`C-03` auth-jwt**: Autenticación con JWT propio, RBAC y control de acceso.
@@ -37,13 +37,13 @@ El proyecto cuenta con **17 changes completados, verificados y archivados** bajo
 * **`C-13` patient-features**: Portal web del paciente (búsqueda de turnos, reserva interactiva y mis turnos).
 * **`C-14` reception-features**: Portal web de recepción (agenda global del día y ABM de plantillas horarias).
 * **`C-15` dentist-features**: Portal web del odontólogo (cronograma del día y registro de presentes).
+* **`C-16` seed-data-script**: Script automatizado `scripts/seed.py` para poblado inicial masivo e idempotente.
+* **`C-17` docker-compose-prod**: Empaquetado y composición de producción con Nginx reverse proxy, multi-stage frontend y aislamiento de red.
+* **`C-18` testing-core**: Pipeline de CI en GitHub Actions (.github/workflows/ci.yml), suite E2E multirol y validación de contratos OpenAPI.
 * **`C-19` ui-dark-mode-theme**: Motor de temas accesible (Dark Zinc/Carbon puro, tokens semánticos y switch cápsula).
 * **`C-20` ui-responsive-accessibility**: Navegación flotante glassmórfica estilo Dynamic Island en desktop, dock inferior táctil en mobile (WCAG 2.5.5) y login clínico modernizado.
 
-### ⏳ Changes Pendientes del Roadmap (3)
-* **`C-16` seed-data-script**: Script automatizado `scripts/seed.py` para poblado inicial masivo.
-* **`C-17` docker-compose-prod**: Empaquetado de producción con Nginx reverse proxy y Gunicorn multi-worker.
-* **`C-18` testing-core**: Pipeline de CI en GitHub Actions y reporte de cobertura cruzada integral.
+> 🚀 **Roadmap 100% completado**: No quedan changes pendientes. El sistema cuenta con la totalidad de sus 20 changes implementados, testeados y archivados.
 
 ---
 
@@ -200,7 +200,7 @@ turnos-odontologia/
 ├── .atl/skill-registry.md         # Registro formal de skills del proyecto
 ├── AGENTS.md                      # Reglas de gobierno para agentes IA
 ├── CLAUDE.md                      # Espejo sincronizado de AGENTS.md
-├── CHANGES.md                     # Roadmap operacional con 17 changes completados y 3 pendientes
+├── CHANGES.md                     # Roadmap operacional con 20 changes completados (100% del roadmap)
 ├── mcp_config.example.json        # Configuración de ejemplo sin secretos para MCP Playwright
 ├── docker-compose.yml             # Orquestación de servicios (api, postgres)
 ├── backend/                       # Backend FastAPI + SQLAlchemy 2.0 async + Alembic
@@ -215,6 +215,6 @@ turnos-odontologia/
 │   └── skills-mcp/                # Documentación formal de la Skill Propia y Servidor MCP
 ├── knowledge-base/                # Base de conocimiento fundacional (10 archivos canónicos)
 └── openspec/                      # Especificaciones canónicas y changes SDD archivados
-    ├── specs/                     # 21 especificaciones principales sincronizadas
-    └── changes/archive/           # 17 changes completados y archivados bajo ciclo SDD
+    ├── specs/                     # 25 especificaciones principales sincronizadas
+    └── changes/archive/           # 20 changes completados y archivados bajo ciclo SDD
 ```
