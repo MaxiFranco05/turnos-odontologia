@@ -37,6 +37,7 @@ COPY --from=builder --chown=appuser:appgroup /root/.local /home/appuser/.local
 
 # Copy application source and migration assets
 COPY --chown=appuser:appgroup app /app/app
+COPY --chown=appuser:appgroup scripts /app/scripts
 COPY --chown=appuser:appgroup alembic /app/alembic
 COPY --chown=appuser:appgroup alembic.ini /app/alembic.ini
 

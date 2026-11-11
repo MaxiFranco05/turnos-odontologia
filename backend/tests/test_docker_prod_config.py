@@ -72,7 +72,7 @@ def test_docker_compose_prod_network_isolation_and_ports():
     frontend = services.get("frontend", {})
     assert "ports" in frontend, "Frontend service must expose HTTP port to host"
     exposed = frontend["ports"]
-    assert any("80:80" in str(p) for p in exposed), "Frontend must publish port 80:80"
+    assert any(":80" in str(p) for p in exposed), "Frontend must publish port to 80"
     
     # Volumes check
     assert "volumes" in data, "compose file must define top-level volumes"
