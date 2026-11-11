@@ -30,12 +30,13 @@ jobs:
 
       - name: Run full backend test suite (unit, integration, contracts, e2e)
         env:
-          DATABASE_URL: sqlite+aiosqlite:///:memory:
+          PYTHONPATH: backend
+          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
           JWT_SECRET: ci_secret_key_minimum_32_characters_for_jwt_testing
           APP_ENV: testing
           TIMEZONE: America/Argentina/Buenos_Aires
         run: |
-          pytest backend/tests -v
+          pytest -c backend/pytest.ini backend/tests -v
 
   frontend-check-and-build:
     name: Frontend Lint, Tests & Build
