@@ -4,6 +4,7 @@ import { Calendar, Clock, Stethoscope, LogOut, User as UserIcon } from 'lucide-r
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { MobileSimulatorButton } from '@/components/MobileSimulatorButton';
 import { cn } from '@/lib/utils';
 import { useOptionalAuth } from '@/context/AuthContext';
 import type { UserProfile, RolUsuario } from '@/types/auth';
@@ -128,6 +129,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user: propUser, onLogout: 
 
           {/* Right: User Capsule, Theme Toggle & Logout */}
           <div className="flex items-center space-x-2 shrink-0">
+            <MobileSimulatorButton />
             <ThemeToggle />
 
             {user && (

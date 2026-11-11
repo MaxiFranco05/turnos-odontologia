@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Stethoscope } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { MobileSimulatorButton } from '@/components/MobileSimulatorButton';
 
 export const AuthLayout: React.FC = () => {
   return (
@@ -12,8 +13,9 @@ export const AuthLayout: React.FC = () => {
         <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-sky-500/15 dark:bg-sky-500/10 rounded-full blur-3xl" />
       </div>
 
-      {/* Top right theme toggle */}
-      <div className="absolute top-3 right-3 sm:top-6 sm:right-6 z-10">
+      {/* Top right controls: Simulator & Theme Toggle */}
+      <div className="absolute top-3 right-3 sm:top-6 sm:right-6 z-10 flex items-center space-x-2">
+        <MobileSimulatorButton />
         <ThemeToggle />
       </div>
 

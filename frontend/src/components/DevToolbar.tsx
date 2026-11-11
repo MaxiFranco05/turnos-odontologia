@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { Sliders, X, Check } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useOptionalSimulator } from '@/context/SimulatorContext';
 import { router } from '@/router/routes';
 import type { RolUsuario } from '@/types/auth';
 
 export const DevToolbar: React.FC = () => {
   const { user, loginAs, logout } = useAuth();
+  const simulator = useOptionalSimulator();
   const [isOpen, setIsOpen] = useState(false);
+
+  // If inside simulated phone iframe, hide dev toolbar
+  if (simulator?.isInsideIframe) {
+    return null;
+  }
 
   const handleSelectRole = (role: RolUsuario | 'public'): void => {
     if (role === 'public') {
