@@ -65,6 +65,10 @@ def test_settings_defaults(monkeypatch):
     """Verifies default values for APP_ENV, DEBUG, and PORT."""
     from app.infrastructure.config import Settings
 
+    monkeypatch.delenv("APP_ENV", raising=False)
+    monkeypatch.delenv("DEBUG", raising=False)
+    monkeypatch.delenv("PORT", raising=False)
+    monkeypatch.delenv("CANCEL_MIN_HOURS", raising=False)
     monkeypatch.setenv("DATABASE_URL", "postgresql+asyncpg://localhost/db")
     monkeypatch.setenv("JWT_SECRET", "supersecretkey_min_32_characters_long_for_hs256")
 

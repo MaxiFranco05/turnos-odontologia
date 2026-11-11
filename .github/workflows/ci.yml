@@ -33,7 +33,6 @@ jobs:
           PYTHONPATH: backend
           DATABASE_URL: "sqlite+aiosqlite:///:memory:"
           JWT_SECRET: ci_secret_key_minimum_32_characters_for_jwt_testing
-          APP_ENV: testing
           TIMEZONE: America/Argentina/Buenos_Aires
         run: |
           pytest -c backend/pytest.ini backend/tests -v
