@@ -5,6 +5,7 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from app.application.turnos import _normalize_dt
 from app.domain.models.base import Base
 from app.domain.models.enums import EstadoTurno, RolUsuario
 from app.domain.models.plantilla import PlantillaDisponibilidad
@@ -72,7 +73,7 @@ async def test_seed_calendar_demo_creates_moderate_non_overlapping_appointments_
     assert EstadoTurno.SOLICITADO in estados
 
     # Verify spread across at least 3 distinct weekdays in the target month
-    distinct_dates = {t.inicio.astimezone(AR_TZ).date() for t in turnos}
+    distinct_dates = {_normalize_dt(t.inicio, AR_TZ).astimezone(AR_TZ).date() for t in turnos}
     assert len(distinct_dates) >= 3
     for d in distinct_dates:
         assert d.year == fixed_date.year
@@ -85,8 +86,8 @@ async def test_seed_calendar_demo_creates_moderate_non_overlapping_appointments_
         dentist_turnos = [t for t in turnos if t.odontologo_id == dentist.id]
         dentist_templates = [p for p in plantillas if p.odontologo_id == dentist.id]
         for idx, t in enumerate(dentist_turnos):
-            start_local = t.inicio.astimezone(AR_TZ)
-            end_local = t.fin.astimezone(AR_TZ)
+            start_local = _normalize_dt(t.inicio, AR_TZ).astimezone(AR_TZ)
+            end_local = _normalize_dt(t.fin, AR_TZ).astimezone(AR_TZ)
             assert (end_local - start_local) == datetime.timedelta(minutes=30)
             matching_tpl = [
                 p
@@ -120,8 +121,8 @@ async def test_seed_calendar_demo_handles_month_end_gracefully(db_session: Async
 
     turnos = list((await db_session.scalars(select(Turno))).all())
     nov_dates = {
-        t.inicio.astimezone(AR_TZ).date()
+        _normalize_dt(t.inicio, AR_TZ).astimezone(AR_TZ).date()
         for t in turnos
-        if t.inicio.astimezone(AR_TZ).month == 11
+        if _normalize_dt(t.inicio, AR_TZ).astimezone(AR_TZ).month == 11
     }
     assert len(nov_dates) >= 3
