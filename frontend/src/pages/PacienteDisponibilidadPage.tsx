@@ -6,6 +6,7 @@ import {
   Filter,
   RotateCcw,
   Stethoscope,
+  User,
   X,
 } from 'lucide-react';
 import {
@@ -22,6 +23,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/Alert';
 import {
   useDisponibilidadQuery,
   useCreateTurnoMutation,
+  useOdontologosQuery,
 } from '@/hooks/usePatientPortal';
 import {
   extractApiErrorMessage,
@@ -29,6 +31,38 @@ import {
   formatTimeFromISO,
 } from '@/services/reception.service';
 import type { SlotDisponibleItem } from '@/types/patient';
+
+export interface OdontologoOption {
+  id: number;
+  nombre: string;
+  especialidad: string;
+  matricula: string;
+  avatarText: string;
+}
+
+export const ODONTOLOGOS_DISPONIBLES: OdontologoOption[] = [
+  {
+    id: 2,
+    nombre: 'Dra. Sofía Martín',
+    especialidad: 'Odontología General y Prevención',
+    matricula: 'MN-48291',
+    avatarText: 'SM',
+  },
+  {
+    id: 3,
+    nombre: 'Dr. Lucas García',
+    especialidad: 'Ortodoncia y Prótesis',
+    matricula: 'MN-51204',
+    avatarText: 'LG',
+  },
+  {
+    id: 5,
+    nombre: 'Dr. Martín Ruiz',
+    especialidad: 'Odontología General y Cirugía',
+    matricula: 'MN-43110',
+    avatarText: 'MR',
+  },
+];
 
 export interface PacienteDisponibilidadPageProps {
   initialOdontologoId?: number;
@@ -38,9 +72,47 @@ export interface PacienteDisponibilidadPageProps {
 export const PacienteDisponibilidadPage: React.FC<
   PacienteDisponibilidadPageProps
 > = ({ initialOdontologoId, initialFecha }) => {
-  const [odontologoIdInput, setOdontologoIdInput] = useState<string>(
-    initialOdontologoId !== undefined ? String(initialOdontologoId) : '2'
+  const odontologosQuery = useOdontologosQuery();
+
+  const dentistsList = useMemo<OdontologoOption[]>(() => {
+    if (odontologosQuery.data && odontologosQuery.data.length > 0) {
+      return odontologosQuery.data.map((doc) => {
+        const initials = doc.nombre
+          .split(' ')
+          .map((p) => p[0])
+          .filter(Boolean)
+          .slice(0, 2)
+          .join('')
+          .toUpperCase();
+        return {
+          id: doc.id,
+          nombre: doc.nombre,
+          especialidad: doc.especialidad || 'Odontología General',
+          matricula: doc.nro_socio || `MN-${48000 + doc.id * 100}`,
+          avatarText: initials || 'DR',
+        };
+      });
+    }
+    return ODONTOLOGOS_DISPONIBLES;
+  }, [odontologosQuery.data]);
+
+  const [userSelectedId, setUserSelectedId] = useState<string | null>(
+    initialOdontologoId !== undefined ? String(initialOdontologoId) : null
   );
+
+  const odontologoIdInput = useMemo<string>(() => {
+    if (userSelectedId !== null) return userSelectedId;
+    if (odontologosQuery.data && odontologosQuery.data.length > 0) {
+      return String(odontologosQuery.data[0].id);
+    }
+    return String(ODONTOLOGOS_DISPONIBLES[0].id);
+  }, [userSelectedId, odontologosQuery.data]);
+
+  const [isCustomId, setIsCustomId] = useState<boolean>(() => {
+    if (initialOdontologoId === undefined) return false;
+    return !ODONTOLOGOS_DISPONIBLES.some((doc) => doc.id === initialOdontologoId);
+  });
+
   const [fecha, setFecha] = useState<string>(
     () => initialFecha || formatLocalDateISO()
   );
@@ -58,6 +130,13 @@ export const PacienteDisponibilidadPage: React.FC<
     const num = Number(trimmed);
     return Number.isInteger(num) && num > 0 ? num : undefined;
   }, [odontologoIdInput]);
+
+  const currentDoctor = useMemo<OdontologoOption | null>(() => {
+    if (!parsedOdontologoId) return null;
+    return (
+      dentistsList.find((doc) => doc.id === parsedOdontologoId) || null
+    );
+  }, [parsedOdontologoId, dentistsList]);
 
   const disponibilidadQuery = useDisponibilidadQuery({
     odontologoId: parsedOdontologoId,
@@ -121,7 +200,8 @@ export const PacienteDisponibilidadPage: React.FC<
   };
 
   const handleResetFilters = (): void => {
-    setOdontologoIdInput('2');
+    setIsCustomId(false);
+    setUserSelectedId(null);
     setFecha(formatLocalDateISO());
     setSelectedSlot(null);
     setMutationError(null);
@@ -157,25 +237,61 @@ export const PacienteDisponibilidadPage: React.FC<
             <span>Buscar Disponibilidad</span>
           </CardTitle>
           <CardDescription>
-            Ingresá el número de profesional y la fecha deseada para ver los turnos libres.
+            Elegí tu odontólogo de preferencia y la fecha deseada para ver los turnos libres.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:items-end">
             <div>
-              <Input
-                id="paciente-odontologo-id"
-                label="ID de Odontólogo"
-                type="number"
-                min={1}
-                value={odontologoIdInput}
+              <label
+                htmlFor="paciente-odontologo-select"
+                className="block text-sm font-medium text-foreground mb-1.5"
+              >
+                Odontólogo / Profesional
+              </label>
+              <select
+                id="paciente-odontologo-select"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={isCustomId ? 'custom' : odontologoIdInput}
                 onChange={(e) => {
-                  setOdontologoIdInput(e.target.value);
+                  const val = e.target.value;
+                  if (val === 'custom') {
+                    setIsCustomId(true);
+                  } else {
+                    setIsCustomId(false);
+                    setUserSelectedId(val);
+                  }
                   setSelectedSlot(null);
                   setMutationError(null);
                   setMutationSuccess(null);
                 }}
-              />
+              >
+                {dentistsList.map((doc) => (
+                  <option key={doc.id} value={String(doc.id)}>
+                    {doc.nombre} ({doc.especialidad})
+                  </option>
+                ))}
+                <option value="custom">Ingresar otro ID numérico...</option>
+              </select>
+
+              {isCustomId && (
+                <div className="mt-2 animate-in fade-in duration-150">
+                  <Input
+                    id="paciente-odontologo-id"
+                    label="ID de Odontólogo"
+                    type="number"
+                    min={1}
+                    placeholder="Ej. 2, 3, 5..."
+                    value={odontologoIdInput}
+                    onChange={(e) => {
+                      setUserSelectedId(e.target.value);
+                      setSelectedSlot(null);
+                      setMutationError(null);
+                      setMutationSuccess(null);
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             <div>
@@ -206,6 +322,39 @@ export const PacienteDisponibilidadPage: React.FC<
               </Button>
             </div>
           </div>
+
+          {/* Banner de profesional seleccionado */}
+          {currentDoctor ? (
+            <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3.5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 font-bold text-sm">
+                  {currentDoctor.avatarText}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground text-sm">
+                      {currentDoctor.nombre}
+                    </span>
+                    <Badge variant="secondary" className="text-[10px] font-medium">
+                      {currentDoctor.matricula}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {currentDoctor.especialidad}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center text-xs text-muted-foreground">
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1.5" />
+                Atención con turno previo
+              </div>
+            </div>
+          ) : parsedOdontologoId ? (
+            <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 p-2.5 rounded-lg border border-border">
+              <User className="h-4 w-4 text-primary" />
+              <span>Consultando agenda para profesional con ID #{parsedOdontologoId}</span>
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 
@@ -225,36 +374,94 @@ export const PacienteDisponibilidadPage: React.FC<
         </Alert>
       )}
 
-      {/* Formulario de Confirmación de Turno Seleccionado */}
+      {/* Modal de Confirmación de Turno Seleccionado */}
       {selectedSlot && (
-        <Card className="border-primary/40 bg-primary/5">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-base text-primary">
-                <Stethoscope className="h-5 w-5" />
-                <span>Confirmar Reserva de Turno</span>
-              </CardTitle>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-confirmar-turno-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-150"
+        >
+          <div className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl animate-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-border">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Stethoscope className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2
+                    id="modal-confirmar-turno-title"
+                    className="text-lg font-bold text-foreground"
+                  >
+                    Confirmar Reserva de Turno
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    Revisá los detalles de la consulta antes de enviar tu solicitud.
+                  </p>
+                </div>
+              </div>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={handleCancelSelection}
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 rounded-lg text-muted-foreground hover:text-foreground"
+                aria-label="Cerrar selección"
               >
                 <X className="h-4 w-4" />
                 <span className="sr-only">Cerrar selección</span>
               </Button>
             </div>
-            <CardDescription>
-              Horario:{' '}
-              <strong className="font-mono text-slate-800">
-                {formatTimeFromISO(selectedSlot.inicio)} –{' '}
-                {formatTimeFromISO(selectedSlot.fin)}
-              </strong>{' '}
-              · Prestación: <strong>{selectedSlot.prestacion}</strong>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+
+            {/* Doctor & Appointment Summary */}
+            <div className="my-5 rounded-xl border border-border bg-muted/30 p-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 font-bold text-sm">
+                  {currentDoctor ? currentDoctor.avatarText : 'DR'}
+                </div>
+                <div>
+                  <div className="font-semibold text-foreground text-sm">
+                    {currentDoctor
+                      ? currentDoctor.nombre
+                      : `Odontólogo ID #${parsedOdontologoId}`}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {currentDoctor
+                      ? `${currentDoctor.especialidad} · ${currentDoctor.matricula}`
+                      : 'Profesional Odontológico'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-2.5 border-t border-border/60 text-xs">
+                <div>
+                  <span className="text-muted-foreground block text-[11px]">
+                    Fecha
+                  </span>
+                  <span className="font-semibold text-foreground">{fecha}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block text-[11px]">
+                    Horario
+                  </span>
+                  <span className="font-mono font-bold text-primary">
+                    {formatTimeFromISO(selectedSlot.inicio)} –{' '}
+                    {formatTimeFromISO(selectedSlot.fin)}
+                  </span>
+                </div>
+                <div className="col-span-2 pt-1">
+                  <span className="text-muted-foreground block text-[11px]">
+                    Prestación prevista
+                  </span>
+                  <span className="font-medium text-foreground">
+                    {selectedSlot.prestacion}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Formulario de Motivo */}
             <form onSubmit={handleSubmitBooking} className="space-y-4">
               <div>
                 <Input
@@ -267,18 +474,15 @@ export const PacienteDisponibilidadPage: React.FC<
                     if (motivoError) setMotivoError(null);
                   }}
                   error={motivoError ?? undefined}
+                  autoFocus
                 />
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  El profesional utilizará este motivo para preparar el instrumental necesario.
+                </p>
               </div>
 
-              <div className="flex items-center gap-3">
-                <Button
-                  type="submit"
-                  loading={createTurnoMutation.isPending}
-                  disabled={createTurnoMutation.isPending}
-                >
-                  <CheckCircle2 className="mr-1.5 h-4 w-4" />
-                  <span>Confirmar solicitud</span>
-                </Button>
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
                 <Button
                   type="button"
                   variant="outline"
@@ -287,10 +491,18 @@ export const PacienteDisponibilidadPage: React.FC<
                 >
                   Cancelar
                 </Button>
+                <Button
+                  type="submit"
+                  loading={createTurnoMutation.isPending}
+                  disabled={createTurnoMutation.isPending}
+                >
+                  <CheckCircle2 className="mr-1.5 h-4 w-4" />
+                  <span>Confirmar solicitud</span>
+                </Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Grilla de Huecos Disponibles */}
@@ -301,14 +513,14 @@ export const PacienteDisponibilidadPage: React.FC<
               <CalendarIcon className="h-4 w-4 text-primary" />
               <span>Turnos Disponibles ({fecha})</span>
             </span>
-            <span className="text-xs font-normal text-slate-500">
+            <span className="text-xs font-normal text-muted-foreground">
               {slots.length} horario(s) libre(s)
             </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {disponibilidadQuery.isLoading ? (
-            <div className="py-10 text-center text-sm text-slate-500">
+            <div className="py-10 text-center text-sm text-muted-foreground">
               Consultando horarios disponibles...
             </div>
           ) : slots.length === 0 ? (

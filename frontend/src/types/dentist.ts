@@ -27,3 +27,17 @@ export type TurnoAsistenciaEstado = 'presente' | 'ausente';
 export interface TurnoAsistenciaUpdateRequest {
   estado: TurnoAsistenciaEstado;
 }
+
+export interface CalendarioDiaResumen {
+  fecha: string;
+  confirmados: number;
+  solicitados: number;
+  atendidos: number;
+  total_activos: number;
+}
+
+export interface CalendarioMesResponse {
+  anio: number;
+  mes: number;
+  dias: CalendarioDiaResumen[];
+}

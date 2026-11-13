@@ -16,7 +16,7 @@ export const App: React.FC = () => {
         <AuthProvider>
           <SimulatorProvider>
             <RouterProvider router={router} />
-            {import.meta.env.DEV && <DevToolbar />}
+            <DevToolbar />
             <PhoneSimulatorModal />
           </SimulatorProvider>
         </AuthProvider>

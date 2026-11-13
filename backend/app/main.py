@@ -43,6 +43,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     from app.api.turnos import router as turnos_router
     from app.api.mis_turnos import router as mis_turnos_router
     from app.api.agenda import router as agenda_router
+    from app.api.odontologos import router as odontologos_router
 
     app.include_router(health_router)
     app.include_router(auth_router)
@@ -51,6 +52,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(turnos_router)
     app.include_router(mis_turnos_router)
     app.include_router(agenda_router)
+    app.include_router(odontologos_router)
 
     return app
 

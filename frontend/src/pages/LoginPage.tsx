@@ -12,23 +12,23 @@ const DEMO_ACCOUNTS = [
   {
     role: 'recepcion',
     title: 'Demo Recepción',
-    sub: 'Camila',
-    identificador: 'recepcion@clinica.com',
-    password: 'Recepcion123',
+    sub: 'Recepción Central',
+    identificador: 'recepcion@turnosodontologia.com',
+    password: 'Admin1234!',
   },
   {
     role: 'odontologo',
     title: 'Demo Odontólogo',
-    sub: 'Dr. Ruiz',
-    identificador: 'martin.ruiz@clinica.com',
-    password: 'Odontologo123',
+    sub: 'Dra. Sofía Martín',
+    identificador: 'sofia.martin@turnosodontologia.com',
+    password: 'Dentist1234!',
   },
   {
     role: 'paciente',
     title: 'Demo Paciente',
-    sub: 'Lucía G.',
-    identificador: 'lucia.gomez@gmail.com',
-    password: 'Paciente123',
+    sub: 'Lucía Gómez',
+    identificador: 'lucia.gomez@example.com',
+    password: 'Patient1234!',
   },
 ];
 

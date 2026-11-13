@@ -1,7 +1,7 @@
 import datetime
 import logging
 from zoneinfo import ZoneInfo
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.models.enums import EstadoTurno, OrigenTurno, RolUsuario
@@ -42,9 +42,17 @@ async def seed_data(
 
     if reset:
         logger.info("Resetting existing database records...")
-        await session.execute(delete(Turno))
-        await session.execute(delete(PlantillaDisponibilidad))
-        await session.execute(delete(Usuario))
+        bind = session.get_bind()
+        if bind is not None and bind.dialect.name == "postgresql":
+            await session.execute(
+                text(
+                    "TRUNCATE TABLE turnos, plantillas_disponibilidad, usuarios RESTART IDENTITY CASCADE"
+                )
+            )
+        else:
+            await session.execute(delete(Turno))
+            await session.execute(delete(PlantillaDisponibilidad))
+            await session.execute(delete(Usuario))
         await session.flush()
 
     # -------------------------------------------------------------
@@ -52,7 +60,7 @@ async def seed_data(
     # -------------------------------------------------------------
     users_spec = [
         {
-            "nombre": "Recepción Central (Ficticia)",
+            "nombre": "Recepción Central",
             "email": "recepcion@turnosodontologia.com",
             "nro_socio": None,
             "password": "Admin1234!",
@@ -61,7 +69,7 @@ async def seed_data(
             "perfil_completo": True,
         },
         {
-            "nombre": "Dra. Sofía Martín (Ficticia)",
+            "nombre": "Dra. Sofía Martín",
             "email": "sofia.martin@turnosodontologia.com",
             "nro_socio": "ODO-001",
             "password": "Dentist1234!",
@@ -71,7 +79,7 @@ async def seed_data(
             "specialty": "Odontología General",
         },
         {
-            "nombre": "Dr. Lucas García (Ficticio)",
+            "nombre": "Dr. Lucas García",
             "email": "lucas.garcia@turnosodontologia.com",
             "nro_socio": "ODO-002",
             "password": "Dentist1234!",
@@ -81,7 +89,7 @@ async def seed_data(
             "specialty": "Ortodoncia y Prótesis",
         },
         {
-            "nombre": "Carlos Benítez (Ficticio)",
+            "nombre": "Carlos Benítez",
             "email": "carlos.benitez@example.com",
             "nro_socio": "SOC-101",
             "password": "Patient1234!",
@@ -90,7 +98,7 @@ async def seed_data(
             "perfil_completo": True,
         },
         {
-            "nombre": "Lucía Gómez (Ficticia)",
+            "nombre": "Lucía Gómez",
             "email": "lucia.gomez@example.com",
             "nro_socio": "SOC-102",
             "password": "Patient1234!",

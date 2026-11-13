@@ -4,6 +4,8 @@ import {
   createTurnoOnline,
   getMisTurnosPaciente,
   cancelarTurnoPaciente,
+  getOdontologos,
+  type OdontologoItem,
 } from '@/services/patient.service';
 import type {
   MisTurnosPacienteItem,
@@ -12,6 +14,17 @@ import type {
   TurnoCreatePayload,
   TurnoResponse,
 } from '@/types/patient';
+
+/**
+ * Queries active dentists in the clinic via GET /api/odontologos.
+ */
+export function useOdontologosQuery() {
+  return useQuery<OdontologoItem[], Error>({
+    queryKey: ['odontologos-list'],
+    queryFn: getOdontologos,
+    staleTime: 1000 * 60 * 10,
+  });
+}
 
 export interface UseDisponibilidadQueryOptions {
   odontologoId?: number;

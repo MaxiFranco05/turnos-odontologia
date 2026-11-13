@@ -90,6 +90,15 @@ El proyecto cuenta con **20 changes completados, verificados y archivados (100% 
    ```
    *La aplicación web estará disponible en:* **`http://localhost:5173`**
 
+3. **Poblado opcional de turnos adicionales para el calendario (`C-22`):**
+   ```bash
+   # Con docker-compose.prod.yml levantado (sin borrar volúmenes al usar `docker compose -f docker-compose.prod.yml down`):
+   docker compose -f docker-compose.prod.yml exec api python -m scripts.seed_calendar_demo
+   # O en ejecución local dentro de backend/:
+   python -m scripts.seed_calendar_demo
+   ```
+   *(Es idempotente y agrega 7 turnos sintéticos distribuidos en 4 días hábiles del mes actual sin alterar `scripts.seed`.)*
+
 ---
 
 ### Opción B: Ejecución Local de Backend sin Docker
@@ -129,9 +138,9 @@ La pantalla de inicio de sesión (`/login`) cuenta con botones de **Acceso Rápi
 
 | Rol | Correo / Identificador | Contraseña | Vistas y Funcionalidades |
 | :--- | :--- | :--- | :--- |
-| **Recepción** | `recepcion@clinica.com` | `Recepcion123` | Agenda diaria global, filtros por fecha/odontólogo, confirmación y anulación de turnos, gestión de plantillas horarias. |
-| **Odontólogo** | `martin.ruiz@clinica.com` | `Odontologo123` | Agenda personal del día, vista cronológica de pacientes, marcado de asistencia (*Presente* / *Ausente*). |
-| **Paciente** | `lucia.gomez@gmail.com` | `Paciente123` | Catálogo de turnos disponibles, reserva online con validación de antelación y cancelación autónoma. |
+| **Recepción** | `recepcion@turnosodontologia.com` | `Admin1234!` | Agenda diaria global, filtros por fecha/odontólogo, confirmación y anulación de turnos, gestión de plantillas horarias (requiere cambio de clave inicial). |
+| **Odontólogo** | `sofia.martin@turnosodontologia.com` | `Dentist1234!` | Agenda personal del día, calendario mensual de confirmados y marcado de asistencia (*Presente* / *Ausente*). También disponible `lucas.garcia@turnosodontologia.com` / `Dentist1234!`. |
+| **Paciente** | `lucia.gomez@example.com` | `Patient1234!` | Catálogo de turnos disponibles, reserva online con validación de antelación y cancelación autónoma. También disponible `carlos.benitez@example.com` / `Patient1234!`. |
 
 ---
 

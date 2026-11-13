@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import apiClient from '@/lib/api';
 import {
+  getMisTurnosCalendario,
   getMisTurnosOdontologo,
   updateTurnoAsistencia,
 } from '@/services/dentist.service';
-import type { MisTurnosOdontologoItem } from '@/types/dentist';
+import type { CalendarioMesResponse, MisTurnosOdontologoItem } from '@/types/dentist';
 import type { TurnoResponseItem } from '@/types/reception';
 
 vi.mock('@/lib/api', () => ({
@@ -112,6 +113,34 @@ describe('dentist.service (Strict TDD - C-15)', () => {
         estado: 'ausente',
       });
       expect(result.estado).toBe('ausente');
+    });
+  });
+
+  describe('getMisTurnosCalendario', () => {
+    it('queries GET /mis-turnos/calendario with exact { anio, mes } params (C-22)', async () => {
+      const mockCalendar: CalendarioMesResponse = {
+        anio: 2026,
+        mes: 11,
+        dias: [
+          {
+            fecha: '2026-11-13',
+            confirmados: 2,
+            solicitados: 1,
+            atendidos: 0,
+            total_activos: 3,
+          },
+        ],
+      };
+
+      vi.mocked(apiClient.get).mockResolvedValueOnce({ data: mockCalendar });
+
+      const result = await getMisTurnosCalendario(2026, 11);
+
+      expect(apiClient.get).toHaveBeenCalledTimes(1);
+      expect(apiClient.get).toHaveBeenCalledWith('/mis-turnos/calendario', {
+        params: { anio: 2026, mes: 11 },
+      });
+      expect(result).toEqual(mockCalendar);
     });
   });
 });

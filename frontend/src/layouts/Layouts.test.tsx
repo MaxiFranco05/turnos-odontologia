@@ -102,6 +102,10 @@ describe('Layouts Architecture (Strict TDD - C-20)', () => {
 
       const agendaLinks = screen.getAllByRole('link', { name: /mi agenda/i });
       expect(agendaLinks.length).toBeGreaterThanOrEqual(1);
+
+      const calendarioLinks = screen.getAllByRole('link', { name: /calendario/i });
+      expect(calendarioLinks.length).toBeGreaterThanOrEqual(1);
+
       expect(screen.queryByRole('link', { name: /plantillas/i })).not.toBeInTheDocument();
       expect(screen.getAllByRole('switch', { name: /cambiar a modo/i }).length).toBeGreaterThanOrEqual(1);
     });

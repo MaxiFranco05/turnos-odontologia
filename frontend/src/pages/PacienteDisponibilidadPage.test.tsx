@@ -198,4 +198,63 @@ describe('PacienteDisponibilidadPage (Strict TDD - US-002 & US-003 / C-13)', () 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent(/no posee el rol de odontólogo/i);
   });
+
+  it('displays doctor details banner and confirmation modal with doctor information on booking', async () => {
+    const user = userEvent.setup();
+    vi.mocked(patientService.getDisponibilidad).mockResolvedValue(SYNTHETIC_SLOTS);
+
+    renderWithQueryClient(
+      <PacienteDisponibilidadPage initialOdontologoId={2} initialFecha="2026-11-23" />
+    );
+
+    // Doctor banner is visible for initialOdontologoId=2 (Dra. Sofía Martín)
+    expect(screen.getByText('Dra. Sofía Martín')).toBeInTheDocument();
+    expect(screen.getByText('MN-48291')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText(/09:00\s*–\s*09:30/)).toBeInTheDocument();
+    });
+
+    // Click "Reservar" on first slot
+    const slotCard = screen.getByTestId('slot-card-0');
+    await user.click(within(slotCard).getByRole('button', { name: /reservar/i }));
+
+    // Confirmation modal dialog is rendered
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toBeInTheDocument();
+    expect(within(dialog).getByText('Confirmar Reserva de Turno')).toBeInTheDocument();
+    expect(within(dialog).getByText('Dra. Sofía Martín')).toBeInTheDocument();
+    expect(within(dialog).getByText(/Odontología General y Prevención\s*·\s*MN-48291/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/09:00\s*–\s*09:30/)).toBeInTheDocument();
+
+    // Cancel closes the modal
+    const cancelBtn = within(dialog).getByRole('button', { name: /cancelar/i });
+    await user.click(cancelBtn);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('allows changing doctor via selector to Dr. Lucas García and Dr. Martín Ruiz', async () => {
+    const user = userEvent.setup();
+    vi.mocked(patientService.getDisponibilidad).mockResolvedValue(SYNTHETIC_SLOTS);
+
+    renderWithQueryClient(
+      <PacienteDisponibilidadPage initialOdontologoId={2} initialFecha="2026-11-23" />
+    );
+
+    const select = screen.getByLabelText(/odontólogo \/ profesional/i);
+    expect(select).toHaveValue('2');
+
+    // Switch to Dr. Lucas García (ID 3)
+    await user.selectOptions(select, '3');
+    expect(patientService.getDisponibilidad).toHaveBeenCalledWith(
+      expect.objectContaining({ odontologo_id: 3 })
+    );
+    expect(screen.getByText('Dr. Lucas García')).toBeInTheDocument();
+    expect(screen.getByText('MN-51204')).toBeInTheDocument();
+
+    // Switch to custom ID
+    await user.selectOptions(select, 'custom');
+    const customInput = screen.getByLabelText(/id de odontólogo/i);
+    expect(customInput).toBeInTheDocument();
+  });
 });

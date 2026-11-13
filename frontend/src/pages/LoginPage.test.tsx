@@ -65,8 +65,8 @@ describe('LoginPage (Strict TDD)', () => {
     const idInput = screen.getByLabelText(/correo o n\.?º de socio/i) as HTMLInputElement;
     const passInput = screen.getByLabelText(/^contraseña/i) as HTMLInputElement;
 
-    expect(idInput.value).toBe('recepcion@clinica.com');
-    expect(passInput.value).toBe('Recepcion123');
+    expect(idInput.value).toBe('recepcion@turnosodontologia.com');
+    expect(passInput.value).toBe('Admin1234!');
   });
 
   it('validates empty identifier and password client-side before sending request', async () => {

@@ -30,8 +30,8 @@ export const MobileSimulatorButton: React.FC<MobileSimulatorButtonProps> = ({
       aria-label="Abrir simulador móvil"
       title="Ver vista móvil interactiva (390px)"
     >
-      <Smartphone className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
-      {showLabel && <span className="hidden sm:inline font-medium">Vista Móvil</span>}
+      <Smartphone className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
+      {showLabel && <span className="hidden xl:inline font-medium whitespace-nowrap">Vista Móvil</span>}
     </Button>
   );
 };

@@ -1,12 +1,18 @@
 import datetime
 from typing import Annotated
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_roles
-from app.application.turnos import get_clinic_date_range_bounds, get_clinic_day_bounds
+from app.application.turnos import (
+    get_clinic_date_range_bounds,
+    get_clinic_day_bounds,
+    get_clinic_month_bounds,
+    summarize_dentist_month_appointments,
+)
 from app.domain.models.enums import EstadoTurno, OrigenTurno, RolUsuario
 from app.domain.models.usuario import Usuario
 from app.infrastructure.config import Settings, get_settings
@@ -159,3 +165,65 @@ async def list_mis_turnos(
         end=range_end,
     )
     return [MisTurnosPacienteItemResponse.model_validate(t) for t in turnos]
+
+
+class CalendarioDiaResumenResponse(BaseModel):
+    """Daily appointment summary counts for a dentist's monthly calendar."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    fecha: datetime.date
+    confirmados: int
+    solicitados: int
+    atendidos: int
+    total_activos: int
+
+
+class CalendarioMesResponse(BaseModel):
+    """Monthly calendar summary response for the authenticated dentist."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    anio: int
+    mes: int
+    dias: list[CalendarioDiaResumenResponse]
+
+
+@router.get("/calendario", response_model=CalendarioMesResponse)
+async def get_mis_turnos_calendario(
+    request: Request,
+    current_user: Annotated[Usuario, Depends(require_roles(RolUsuario.ODONTOLOGO))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    anio: int | None = Query(default=None, ge=2000, le=2100),
+    mes: int | None = Query(default=None, ge=1, le=12),
+) -> CalendarioMesResponse:
+    """Return active appointment counts per day for the authenticated dentist's month."""
+    settings: Settings = getattr(request.app.state, "settings", None) or get_settings()
+    today_clinic = datetime.datetime.now(ZoneInfo(settings.TIMEZONE)).date()
+    target_year = anio if anio is not None else today_clinic.year
+    target_month = mes if mes is not None else today_clinic.month
+
+    month_start, month_end = get_clinic_month_bounds(
+        anio=target_year,
+        mes=target_month,
+        timezone_str=settings.TIMEZONE,
+    )
+
+    turno_repo = SqlAlchemyTurnoRepository(db)
+    turnos = await turno_repo.find_by_dentist_range(
+        odontologo_id=current_user.id,
+        start=month_start,
+        end=month_end,
+    )
+    summary_items = summarize_dentist_month_appointments(
+        turnos=turnos,
+        anio=target_year,
+        mes=target_month,
+        timezone_str=settings.TIMEZONE,
+    )
+    return CalendarioMesResponse(
+        anio=target_year,
+        mes=target_month,
+        dias=[CalendarioDiaResumenResponse(**item) for item in summary_items],
+    )
+

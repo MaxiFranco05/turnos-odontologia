@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { OdontologoAgendaPage } from '@/pages/OdontologoAgendaPage';
@@ -12,11 +13,12 @@ vi.mock('@/services/dentist.service', async (importOriginal) => {
   return {
     ...actual,
     getMisTurnosOdontologo: vi.fn(),
+    getMisTurnosCalendario: vi.fn(),
     updateTurnoAsistencia: vi.fn(),
   };
 });
 
-function renderWithQueryClient(ui: React.ReactElement) {
+function renderWithQueryClient(ui: React.ReactElement, initialRoute = '/odontologo/agenda') {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -24,7 +26,11 @@ function renderWithQueryClient(ui: React.ReactElement) {
     },
   });
   return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={[initialRoute]}>
+        {ui}
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 }
 
@@ -99,6 +105,11 @@ const SYNTHETIC_DENTIST_TURNOS: MisTurnosOdontologoItem[] = [
 describe('OdontologoAgendaPage (Strict TDD - US-007 & US-008 / C-15)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(dentistService.getMisTurnosCalendario).mockResolvedValue({
+      anio: 2026,
+      mes: 11,
+      dias: [],
+    });
   });
 
   it('renders chronological daily self-agenda, contiguous slots (CB-01), and restricts Presente/Ausente buttons strictly to confirmado state (RN-TU-03)', async () => {
@@ -253,5 +264,76 @@ describe('OdontologoAgendaPage (Strict TDD - US-007 & US-008 / C-15)', () => {
     expect(alert).toHaveTextContent(
       /solo se puede registrar asistencia sobre turnos confirmados/i
     );
+  });
+
+  it('displays Calendario de Confirmados view, month navigation, and lists only reception-confirmed appointments', async () => {
+    vi.mocked(dentistService.getMisTurnosOdontologo).mockResolvedValue(
+      SYNTHETIC_DENTIST_TURNOS
+    );
+
+    renderWithQueryClient(
+      <OdontologoAgendaPage initialFecha="2026-11-10" initialVista="calendario" />,
+      '/odontologo/calendario'
+    );
+
+    // Verify calendar view header and month navigation
+    expect(await screen.findByText(/Calendario de Turnos Confirmados/i)).toBeInTheDocument();
+    expect(screen.getByText(/Navegación Mensual/i)).toBeInTheDocument();
+
+    // Verify confirmed patient card is rendered (Turno 501: Lucía Gómez)
+    expect(await screen.findByTestId('confirmed-card-501')).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('confirmed-card-501')).getByText('Confirmado por Recepción')
+    ).toBeInTheDocument();
+
+    // Verify non-confirmed appointments (e.g. Turno 502: Mateo Fernández, 'solicitado') are NOT in this view
+    expect(screen.queryByTestId('confirmed-card-502')).not.toBeInTheDocument();
+  });
+
+  it('renders status dots only on days with appointments and queries next month on navigation (C-22)', async () => {
+    const user = userEvent.setup();
+    vi.mocked(dentistService.getMisTurnosOdontologo).mockResolvedValue([]);
+    vi.mocked(dentistService.getMisTurnosCalendario).mockResolvedValue({
+      anio: 2026,
+      mes: 11,
+      dias: [
+        {
+          fecha: '2026-11-13',
+          confirmados: 2,
+          solicitados: 1,
+          atendidos: 0,
+          total_activos: 3,
+        },
+        {
+          fecha: '2026-11-16',
+          confirmados: 0,
+          solicitados: 1,
+          atendidos: 0,
+          total_activos: 1,
+        },
+      ],
+    });
+
+    renderWithQueryClient(
+      <OdontologoAgendaPage initialFecha="2026-11-10" initialVista="calendario" />,
+      '/odontologo/calendario'
+    );
+
+    expect(await screen.findByTestId('calendar-dot-confirmados-2026-11-13')).toBeInTheDocument();
+    expect(screen.getByTestId('calendar-dot-solicitados-2026-11-13')).toBeInTheDocument();
+    expect(screen.getByTestId('calendar-dot-solicitados-2026-11-16')).toBeInTheDocument();
+    expect(screen.queryByTestId('calendar-dot-confirmados-2026-11-16')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('calendar-dot-confirmados-2026-11-15')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('calendar-dot-solicitados-2026-11-15')).not.toBeInTheDocument();
+
+    // Legend is visible
+    expect(screen.getByText('Confirmados')).toBeInTheDocument();
+    expect(screen.getByText('Pend. recepción')).toBeInTheDocument();
+
+    // Navigate to next month (December 2026)
+    await user.click(screen.getByRole('button', { name: /mes siguiente/i }));
+    await waitFor(() => {
+      expect(dentistService.getMisTurnosCalendario).toHaveBeenCalledWith(2026, 12);
+    });
   });
 });

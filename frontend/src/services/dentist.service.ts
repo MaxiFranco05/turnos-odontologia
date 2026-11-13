@@ -1,5 +1,6 @@
 import apiClient from '@/lib/api';
 import type {
+  CalendarioMesResponse,
   MisTurnosOdontologoItem,
   TurnoAsistenciaUpdateRequest,
   TurnoResponse,
@@ -15,6 +16,22 @@ export async function getMisTurnosOdontologo(
   const response = await apiClient.get<MisTurnosOdontologoItem[]>('/mis-turnos', {
     params: { fecha },
   });
+  return response.data;
+}
+
+/**
+ * Queries GET /api/mis-turnos/calendario?anio=YYYY&mes=MM for the authenticated dentist (C-22).
+ */
+export async function getMisTurnosCalendario(
+  anio: number,
+  mes: number
+): Promise<CalendarioMesResponse> {
+  const response = await apiClient.get<CalendarioMesResponse>(
+    '/mis-turnos/calendario',
+    {
+      params: { anio, mes },
+    }
+  );
   return response.data;
 }
 

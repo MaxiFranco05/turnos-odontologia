@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, Stethoscope, LogOut, User as UserIcon } from 'lucide-react';
+import { Calendar, CalendarDays, Clock, Stethoscope, LogOut, User as UserIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -40,6 +40,12 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Mi agenda',
     href: '/odontologo/agenda',
     icon: Calendar,
+    roles: ['odontologo'],
+  },
+  {
+    label: 'Calendario',
+    href: '/odontologo/calendario',
+    icon: CalendarDays,
     roles: ['odontologo'],
   },
   // Paciente
@@ -91,20 +97,20 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user: propUser, onLogout: 
       <header className="hidden md:flex sticky top-4 z-40 px-4 sm:px-6 w-full justify-center">
         <nav
           aria-label="Navegación principal desktop"
-          className="glass-surface w-full max-w-4xl rounded-full px-4 py-2 flex items-center justify-between gap-4 transition-all duration-200 shadow-lg"
+          className="glass-surface w-full max-w-5xl rounded-full px-4 py-2 flex items-center justify-between gap-3 lg:gap-4 transition-all duration-200 shadow-lg"
         >
           {/* Left: Brand Emblem */}
           <div className="flex items-center space-x-2.5 shrink-0">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-sky-600 to-cyan-400 text-white shadow-sm glow-cyan">
               <Stethoscope className="h-4 w-4" />
             </div>
-            <span className="text-sm font-bold tracking-tight text-slate-900 dark:text-foreground">
+            <span className="text-sm font-bold tracking-tight text-slate-900 dark:text-foreground whitespace-nowrap">
               Turnos Odontología
             </span>
           </div>
 
           {/* Center: Segmented Navigation Pills */}
-          <div className="flex items-center bg-slate-200/50 dark:bg-zinc-800/60 p-1 rounded-full border border-black/5 dark:border-white/5">
+          <div className="flex items-center bg-slate-200/50 dark:bg-zinc-800/60 p-1 rounded-full border border-black/5 dark:border-white/5 shrink-0">
             {allowedNavItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -113,15 +119,15 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user: propUser, onLogout: 
                   to={item.href}
                   className={({ isActive }) =>
                     cn(
-                      'px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-150 active:scale-[0.96]',
+                      'px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all duration-150 active:scale-[0.96]',
                       isActive
                         ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/30'
                         : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100'
                     )
                   }
                 >
-                  <Icon className="h-3.5 w-3.5" />
-                  <span>{item.label}</span>
+                  <Icon className="h-3.5 w-3.5 shrink-0" />
+                  <span className="whitespace-nowrap">{item.label}</span>
                 </NavLink>
               );
             })}
@@ -133,13 +139,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user: propUser, onLogout: 
             <ThemeToggle />
 
             {user && (
-              <div className="flex items-center space-x-2 border-l border-slate-200/60 dark:border-zinc-800 pl-2">
+              <div className="flex items-center space-x-2 border-l border-slate-200/60 dark:border-zinc-800 pl-2 shrink-0">
                 <div className="flex items-center space-x-1.5 text-xs text-slate-700 dark:text-slate-200 bg-slate-100/80 dark:bg-zinc-800/80 px-2.5 py-1 rounded-full border border-slate-200/60 dark:border-zinc-700/60">
-                  <UserIcon className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
+                  <UserIcon className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
                   <span className="font-medium max-w-[120px] truncate">
                     {user.nombre} {user.apellido}
                   </span>
-                  <Badge variant="secondary" className="capitalize text-[10px] px-1.5 py-0">
+                  <Badge variant="secondary" className="capitalize text-[10px] px-1.5 py-0 whitespace-nowrap">
                     {ROLE_LABELS[user.rol]}
                   </Badge>
                 </div>
@@ -148,12 +154,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ user: propUser, onLogout: 
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="rounded-full h-8 px-3 text-xs flex items-center space-x-1 text-slate-600 dark:text-slate-300 hover:text-destructive dark:hover:text-destructive active:scale-[0.96] transition-transform"
+                  className="rounded-full h-8 px-2.5 lg:px-3 text-xs flex items-center space-x-1 text-slate-600 dark:text-slate-300 hover:text-destructive dark:hover:text-destructive active:scale-[0.96] transition-transform shrink-0"
                   aria-label="Cerrar sesión"
                   title="Cerrar sesión"
                 >
-                  <LogOut className="h-3.5 w-3.5" />
-                  <span>Cerrar sesión</span>
+                  <LogOut className="h-3.5 w-3.5 shrink-0" />
+                  <span className="hidden lg:inline whitespace-nowrap">Cerrar sesión</span>
                 </Button>
               </div>
             )}

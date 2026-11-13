@@ -454,3 +454,254 @@ def test_get_mis_turnos_rbac_password_and_query_validation_errors(
         == 422
     )
 
+
+# =====================================================================
+# C-22 Task 1.1: Pure Synchronous Month Helpers for Dentist Calendar
+# =====================================================================
+
+
+def test_month_calendar_helpers_are_pure_synchronous_functions():
+    """C-22 Task 1.1 (Hard Rule #3): Month helpers must be pure synchronous def functions."""
+    from app.application.turnos import (
+        get_clinic_month_bounds,
+        summarize_dentist_month_appointments,
+    )
+
+    assert inspect.isfunction(get_clinic_month_bounds)
+    assert not inspect.iscoroutinefunction(get_clinic_month_bounds)
+    assert inspect.isfunction(summarize_dentist_month_appointments)
+    assert not inspect.iscoroutinefunction(summarize_dentist_month_appointments)
+
+
+def test_get_clinic_month_bounds_handles_standard_and_december_rollover():
+    """C-22 Task 1.1: Computes [first_day 00:00, next_month_first_day 00:00) in clinic TZ."""
+    from app.application.turnos import get_clinic_month_bounds
+
+    start_nov, end_nov = get_clinic_month_bounds(2026, 11)
+    assert start_nov == datetime.datetime(2026, 11, 1, 0, 0, 0, tzinfo=AR_TZ)
+    assert end_nov == datetime.datetime(2026, 12, 1, 0, 0, 0, tzinfo=AR_TZ)
+
+    # Triangulate December -> January rollover and invalid month
+    start_dec, end_dec = get_clinic_month_bounds(2026, 12, timezone_str="America/Argentina/Buenos_Aires")
+    assert start_dec == datetime.datetime(2026, 12, 1, 0, 0, 0, tzinfo=AR_TZ)
+    assert end_dec == datetime.datetime(2027, 1, 1, 0, 0, 0, tzinfo=AR_TZ)
+
+    with pytest.raises(ValueError):
+        get_clinic_month_bounds(2026, 13)
+    with pytest.raises(ValueError):
+        get_clinic_month_bounds(2026, 0)
+
+
+def test_summarize_dentist_month_appointments_groups_by_clinic_date_and_excludes_cancelled():
+    """C-22 Task 1.1 (CB-03, CB-05, RN-TU-04): Groups active appointments in clinic TZ and excludes cancelado/anulado."""
+    from types import SimpleNamespace
+    from app.application.turnos import summarize_dentist_month_appointments
+    from app.domain.models.enums import EstadoTurno
+
+    utc = datetime.timezone.utc
+    turnos = [
+        # 2026-11-30 22:00 AR == 2026-12-01 01:00 UTC -> must count in 2026-11-30 (CB-05)
+        SimpleNamespace(
+            inicio=datetime.datetime(2026, 12, 1, 1, 0, tzinfo=utc),
+            estado=EstadoTurno.CONFIRMADO,
+        ),
+        # Same day 2026-11-30 with solicitado
+        SimpleNamespace(
+            inicio=datetime.datetime(2026, 11, 30, 14, 0, tzinfo=AR_TZ),
+            estado=EstadoTurno.SOLICITADO,
+        ),
+        # 2026-11-13: 1 presente + 1 ausente + 1 cancelado + 1 anulado (CB-03)
+        SimpleNamespace(
+            inicio=datetime.datetime(2026, 11, 13, 9, 0, tzinfo=AR_TZ),
+            estado=EstadoTurno.PRESENTE,
+        ),
+        SimpleNamespace(
+            inicio=datetime.datetime(2026, 11, 13, 10, 0, tzinfo=AR_TZ),
+            estado=EstadoTurno.AUSENTE,
+        ),
+        SimpleNamespace(
+            inicio=datetime.datetime(2026, 11, 13, 11, 0, tzinfo=AR_TZ),
+            estado=EstadoTurno.CANCELADO,
+        ),
+        SimpleNamespace(
+            inicio=datetime.datetime(2026, 11, 13, 12, 0, tzinfo=AR_TZ),
+            estado=EstadoTurno.ANULADO,
+        ),
+        # 2026-11-14: ONLY cancelado -> must NOT appear in summary
+        SimpleNamespace(
+            inicio=datetime.datetime(2026, 11, 14, 15, 0, tzinfo=AR_TZ),
+            estado=EstadoTurno.CANCELADO,
+        ),
+        # Out-of-month appointment (2026-12-01 09:00 AR) -> must NOT count in November
+        SimpleNamespace(
+            inicio=datetime.datetime(2026, 12, 1, 9, 0, tzinfo=AR_TZ),
+            estado=EstadoTurno.CONFIRMADO,
+        ),
+    ]
+
+    summary = summarize_dentist_month_appointments(turnos, anio=2026, mes=11)
+
+    assert summary == [
+        {
+            "fecha": datetime.date(2026, 11, 13),
+            "confirmados": 0,
+            "solicitados": 0,
+            "atendidos": 2,
+            "total_activos": 2,
+        },
+        {
+            "fecha": datetime.date(2026, 11, 30),
+            "confirmados": 1,
+            "solicitados": 1,
+            "atendidos": 0,
+            "total_activos": 2,
+        },
+    ]
+
+
+# =====================================================================
+# C-22 Task 1.2: GET /api/mis-turnos/calendario Endpoint & Strict DTOs
+# =====================================================================
+
+
+def test_calendario_response_schemas_enforce_extra_forbid():
+    """C-22 Task 1.2 (Hard Rule #1): Calendario schemas must reject undeclared fields."""
+    from pydantic import ValidationError
+    from app.api.mis_turnos import CalendarioDiaResumenResponse, CalendarioMesResponse
+
+    dia = CalendarioDiaResumenResponse(
+        fecha=datetime.date(2027, 6, 7),
+        confirmados=2,
+        solicitados=1,
+        atendidos=0,
+        total_activos=3,
+    )
+    mes = CalendarioMesResponse(anio=2027, mes=6, dias=[dia])
+    assert mes.dias[0].total_activos == 3
+
+    with pytest.raises(ValidationError):
+        CalendarioDiaResumenResponse(
+            fecha=datetime.date(2027, 6, 7),
+            confirmados=2,
+            solicitados=1,
+            atendidos=0,
+            total_activos=3,
+            extra_field="nope",
+        )
+
+    with pytest.raises(ValidationError):
+        CalendarioMesResponse(anio=2027, mes=6, dias=[dia], extra_field="nope")
+
+
+def test_get_mis_turnos_calendario_returns_sorted_summary_and_isolates_dentist(
+    dentist_agenda_client_and_context,
+):
+    """C-22 Task 1.2: Returns monthly active counts for authenticated dentist only, excluding cancelado/anulado."""
+    client, _app, users, tokens = dentist_agenda_client_and_context
+    h_sofia = {"Authorization": f"Bearer {tokens['odontologo_sofia']}"}
+    h_juan = {"Authorization": f"Bearer {tokens['odontologo_juan']}"}
+
+    # In fixture, June 2027 has for Sofia:
+    # - 2027-06-07: 1 confirmado, 1 solicitado, 1 presente, 1 cancelado, 1 anulado -> total_activos=3
+    # - 2027-06-08: 1 confirmado
+    # And Juan has 1 confirmado on 2027-06-07 (must NOT appear for Sofia)
+    res_sofia = client.get(
+        "/api/mis-turnos/calendario",
+        params={"anio": 2027, "mes": 6},
+        headers=h_sofia,
+    )
+    assert res_sofia.status_code == 200
+    assert res_sofia.json() == {
+        "anio": 2027,
+        "mes": 6,
+        "dias": [
+            {
+                "fecha": "2027-06-06",
+                "confirmados": 1,
+                "solicitados": 0,
+                "atendidos": 0,
+                "total_activos": 1,
+            },
+            {
+                "fecha": "2027-06-07",
+                "confirmados": 1,
+                "solicitados": 1,
+                "atendidos": 2,
+                "total_activos": 4,
+            },
+            {
+                "fecha": "2027-06-08",
+                "confirmados": 1,
+                "solicitados": 0,
+                "atendidos": 0,
+                "total_activos": 1,
+            },
+        ],
+    }
+
+    res_juan = client.get(
+        "/api/mis-turnos/calendario",
+        params={"anio": 2027, "mes": 6},
+        headers=h_juan,
+    )
+    assert res_juan.status_code == 200
+    assert res_juan.json() == {
+        "anio": 2027,
+        "mes": 6,
+        "dias": [
+            {
+                "fecha": "2027-06-07",
+                "confirmados": 1,
+                "solicitados": 0,
+                "atendidos": 0,
+                "total_activos": 1,
+            }
+        ],
+    }
+
+    # Defaults without anio/mes resolve current clinic year/month cleanly
+    res_default = client.get("/api/mis-turnos/calendario", headers=h_sofia)
+    assert res_default.status_code == 200
+    today_clinic = datetime.datetime.now(AR_TZ).date()
+    assert res_default.json()["anio"] == today_clinic.year
+    assert res_default.json()["mes"] == today_clinic.month
+    assert res_default.json()["dias"] == []
+
+
+def test_get_mis_turnos_calendario_rbac_and_query_validation(
+    dentist_agenda_client_and_context,
+):
+    """C-22 Task 1.2 (CB-06, RN-GL-01): Enforces 401, 403 for non-dentist / pending password, and 422 on invalid month."""
+    client, _app, _users, tokens = dentist_agenda_client_and_context
+    h_lucia = {"Authorization": f"Bearer {tokens['paciente_lucia']}"}
+    h_recepcion = {"Authorization": f"Bearer {tokens['recepcion']}"}
+    h_pendiente = {"Authorization": f"Bearer {tokens['odontologo_pendiente']}"}
+    h_sofia = {"Authorization": f"Bearer {tokens['odontologo_sofia']}"}
+
+    assert client.get("/api/mis-turnos/calendario").status_code == 401
+    assert client.get("/api/mis-turnos/calendario", headers=h_lucia).status_code == 403
+    assert client.get("/api/mis-turnos/calendario", headers=h_recepcion).status_code == 403
+
+    res_pwd = client.get("/api/mis-turnos/calendario", headers=h_pendiente)
+    assert res_pwd.status_code == 403
+    assert res_pwd.json()["detail"] == "password_change_required"
+
+    assert (
+        client.get(
+            "/api/mis-turnos/calendario",
+            params={"anio": 2027, "mes": 0},
+            headers=h_sofia,
+        ).status_code
+        == 422
+    )
+    assert (
+        client.get(
+            "/api/mis-turnos/calendario",
+            params={"anio": 2027, "mes": 13},
+            headers=h_sofia,
+        ).status_code
+        == 422
+    )
+
+
+

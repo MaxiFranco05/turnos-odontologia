@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 from app.application.availability import calculate_free_slots
 from app.domain.models.enums import EstadoTurno, RolUsuario
 from app.domain.models.plantilla import PlantillaDisponibilidad
+from app.domain.models.turno import Turno
 
 DEFAULT_CLINIC_TIMEZONE = "America/Argentina/Buenos_Aires"
 DEFAULT_CANCEL_MIN_HOURS = 24
@@ -197,6 +198,68 @@ def get_clinic_date_range_bounds(
     range_start = datetime.datetime.combine(start_date, datetime.time.min, tzinfo=zone)
     range_end = datetime.datetime.combine(end_date, datetime.time.min, tzinfo=zone) + datetime.timedelta(days=1)
     return range_start, range_end
+
+
+def get_clinic_month_bounds(
+    anio: int,
+    mes: int,
+    timezone_str: str | None = None,
+) -> tuple[datetime.datetime, datetime.datetime]:
+    """Return half-open [month_start, next_month_start) bounds in the clinic timezone."""
+    if mes < 1 or mes > 12:
+        raise ValueError("El mes debe estar entre 1 y 12.")
+
+    zone = ZoneInfo(timezone_str or DEFAULT_CLINIC_TIMEZONE)
+    month_start = datetime.datetime(anio, mes, 1, 0, 0, 0, tzinfo=zone)
+    if mes == 12:
+        next_month_start = datetime.datetime(anio + 1, 1, 1, 0, 0, 0, tzinfo=zone)
+    else:
+        next_month_start = datetime.datetime(anio, mes + 1, 1, 0, 0, 0, tzinfo=zone)
+    return month_start, next_month_start
+
+
+def summarize_dentist_month_appointments(
+    turnos: list[Turno],
+    anio: int,
+    mes: int,
+    timezone_str: str | None = None,
+) -> list[dict[str, int | datetime.date]]:
+    """Aggregate active dentist appointments by local clinic date, excluding cancelled/annulled."""
+    zone = ZoneInfo(timezone_str or DEFAULT_CLINIC_TIMEZONE)
+    counts_by_date: dict[datetime.date, dict[str, int]] = {}
+
+    for turno in turnos:
+        estado = EstadoTurno(turno.estado)
+        if estado in (EstadoTurno.CANCELADO, EstadoTurno.ANULADO):
+            continue
+
+        inicio_dt = _normalize_dt(turno.inicio, zone).astimezone(zone)
+        local_date = inicio_dt.date()
+        if local_date.year != anio or local_date.month != mes:
+            continue
+
+        bucket = counts_by_date.setdefault(
+            local_date,
+            {"confirmados": 0, "solicitados": 0, "atendidos": 0},
+        )
+        if estado == EstadoTurno.CONFIRMADO:
+            bucket["confirmados"] += 1
+        elif estado == EstadoTurno.SOLICITADO:
+            bucket["solicitados"] += 1
+        elif estado in (EstadoTurno.PRESENTE, EstadoTurno.AUSENTE):
+            bucket["atendidos"] += 1
+
+    return [
+        {
+            "fecha": fecha,
+            "confirmados": bucket["confirmados"],
+            "solicitados": bucket["solicitados"],
+            "atendidos": bucket["atendidos"],
+            "total_activos": bucket["confirmados"] + bucket["solicitados"] + bucket["atendidos"],
+        }
+        for fecha, bucket in sorted(counts_by_date.items())
+    ]
+
 
 
 

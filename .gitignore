@@ -48,3 +48,7 @@ dist/
 
 .venv/
 venv/
+
+# Guion del video TPI (uso local del equipo)
+docs/guion-video-tpi.pdf
+docs/guion-video-tpi.md

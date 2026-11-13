@@ -81,3 +81,20 @@ export async function cancelarTurnoPaciente(
   );
   return response.data;
 }
+
+export interface OdontologoItem {
+  id: number;
+  nombre: string;
+  email?: string;
+  nro_socio?: string;
+  especialidad?: string;
+}
+
+/**
+ * Lists active dentists in the clinic for appointment booking via GET /api/odontologos.
+ */
+export async function getOdontologos(): Promise<OdontologoItem[]> {
+  const response = await apiClient.get<OdontologoItem[]>('/odontologos');
+  return response.data;
+}
+

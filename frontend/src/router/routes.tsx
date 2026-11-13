@@ -50,7 +50,11 @@ export const router = createBrowserRouter([
           // Odontólogo (C-15)
           {
             path: 'odontologo/agenda',
-            element: <OdontologoAgendaPage />,
+            element: <OdontologoAgendaPage initialVista="agenda" />,
+          },
+          {
+            path: 'odontologo/calendario',
+            element: <OdontologoAgendaPage initialVista="calendario" />,
           },
           // Paciente (C-13)
           {
