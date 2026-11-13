@@ -6,31 +6,13 @@ import { Button } from '@/components/ui/Button';
 import { Alert, AlertDescription } from '@/components/ui/Alert';
 import { useOptionalAuth } from '@/context/AuthContext';
 import { useLoginMutation } from '@/hooks/useAuthMutations';
+import {
+  DEMO_ACCOUNTS,
+  clearDemoPasswordOverride,
+  getDemoPassword,
+  type DemoAccount,
+} from '@/lib/demoCredentials';
 import { getDefaultRouteForUser } from '@/types/auth';
-
-const DEMO_ACCOUNTS = [
-  {
-    role: 'recepcion',
-    title: 'Demo Recepción',
-    sub: 'Recepción Central',
-    identificador: 'recepcion@turnosodontologia.com',
-    password: 'Admin1234!',
-  },
-  {
-    role: 'odontologo',
-    title: 'Demo Odontólogo',
-    sub: 'Dra. Sofía Martín',
-    identificador: 'sofia.martin@turnosodontologia.com',
-    password: 'Dentist1234!',
-  },
-  {
-    role: 'paciente',
-    title: 'Demo Paciente',
-    sub: 'Lucía Gómez',
-    identificador: 'lucia.gomez@example.com',
-    password: 'Patient1234!',
-  },
-];
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -52,9 +34,9 @@ export const LoginPage: React.FC = () => {
     return <Navigate to={getDefaultRouteForUser(auth.user)} replace />;
   }
 
-  const handleFillDemo = (demo: typeof DEMO_ACCOUNTS[number]) => {
+  const handleFillDemo = (demo: DemoAccount) => {
     setIdentificador(demo.identificador);
-    setPassword(demo.password);
+    setPassword(getDemoPassword(demo.identificador, demo.password));
     setValidationErrors({});
     setErrorMessage(null);
   };
@@ -96,6 +78,7 @@ export const LoginPage: React.FC = () => {
           const detail = err?.response?.data?.detail;
 
           if (status === 401 || detail === 'Credenciales inválidas') {
+            clearDemoPasswordOverride(identificador.trim());
             setErrorMessage('Credenciales inválidas');
           } else if (status === 429) {
             setErrorMessage('Demasiados intentos fallidos. Intente nuevamente en 60 segundos.');

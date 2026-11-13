@@ -215,4 +215,40 @@ describe('CambiarPasswordPage (Strict TDD - US-010)', () => {
       expect(screen.getByText('Portal Paciente')).toBeInTheDocument();
     });
   });
+
+  it('persists password override in localStorage when demo account changes password', async () => {
+    const user = userEvent.setup();
+    const establishMock = vi.fn();
+    const mockToken: TokenResponsePayload = {
+      access_token: 'header.' + btoa(JSON.stringify({ sub: '1', rol: 'recepcion', debe_cambiar_password: false })) + '.sig',
+      token_type: 'bearer',
+      rol: 'recepcion',
+      debe_cambiar_password: false,
+      perfil_completo: true,
+    };
+
+    vi.spyOn(authService, 'changePassword').mockResolvedValueOnce(mockToken);
+
+    const userProfile: UserProfile = {
+      id: 1,
+      email: 'recepcion@turnosodontologia.com',
+      rol: 'recepcion',
+      nombre: 'Recepción',
+      apellido: 'Central',
+      debe_cambiar_password: true,
+      perfil_completo: true,
+    };
+
+    renderCambiarPasswordPage(userProfile, establishMock);
+
+    await user.type(screen.getByLabelText(/contraseña actual/i), 'Admin1234!');
+    await user.type(screen.getByLabelText(/^nueva contraseña/i), 'Recepcion2026!');
+    await user.type(screen.getByLabelText(/confirmar nueva contraseña/i), 'Recepcion2026!');
+    await user.click(screen.getByRole('button', { name: /actualizar contraseña/i }));
+
+    await waitFor(() => {
+      expect(localStorage.getItem('demo_override_password_recepcion@turnosodontologia.com')).toBe('Recepcion2026!');
+      expect(screen.getByText('Portal Recepción')).toBeInTheDocument();
+    });
+  });
 });

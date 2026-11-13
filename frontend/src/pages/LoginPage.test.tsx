@@ -69,6 +69,21 @@ describe('LoginPage (Strict TDD)', () => {
     expect(passInput.value).toBe('Admin1234!');
   });
 
+  it('populates quick access password from localStorage override when present', async () => {
+    const user = userEvent.setup();
+    localStorage.setItem('demo_override_password_recepcion@turnosodontologia.com', 'NuevaPass2026!');
+    renderLoginPage();
+
+    const recepcionChip = screen.getByRole('button', { name: /demo recepción/i });
+    await user.click(recepcionChip);
+
+    const idInput = screen.getByLabelText(/correo o n\.?º de socio/i) as HTMLInputElement;
+    const passInput = screen.getByLabelText(/^contraseña/i) as HTMLInputElement;
+
+    expect(idInput.value).toBe('recepcion@turnosodontologia.com');
+    expect(passInput.value).toBe('NuevaPass2026!');
+  });
+
   it('validates empty identifier and password client-side before sending request', async () => {
     const user = userEvent.setup();
     const loginSpy = vi.spyOn(authService, 'loginUser');

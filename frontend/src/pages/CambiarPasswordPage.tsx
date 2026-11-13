@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Alert, AlertDescription } from '@/components/ui/Alert';
 import { useOptionalAuth } from '@/context/AuthContext';
 import { useChangePasswordMutation } from '@/hooks/useAuthMutations';
+import { saveDemoPasswordOverride } from '@/lib/demoCredentials';
 import { getDefaultRouteForUser } from '@/types/auth';
 
 export const CambiarPasswordPage: React.FC = () => {
@@ -91,6 +92,9 @@ export const CambiarPasswordPage: React.FC = () => {
       },
       {
         onSuccess: (data) => {
+          if (user.email) {
+            saveDemoPasswordOverride(user.email, passwordNueva);
+          }
           const nextRoute = getDefaultRouteForUser(data);
           navigate(nextRoute, { replace: true });
         },

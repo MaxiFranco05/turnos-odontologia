@@ -1,14 +1,35 @@
 import React, { useState } from 'react';
 import { Sliders, X, Check } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useOptionalSimulator } from '@/context/SimulatorContext';
+import { useLoginMutation } from '@/hooks/useAuthMutations';
+import {
+  clearDemoPasswordOverride,
+  getDemoAccountByRole,
+  getDemoPassword,
+} from '@/lib/demoCredentials';
 import { router } from '@/router/routes';
-import type { RolUsuario } from '@/types/auth';
+import { getDefaultRouteForUser, type RolUsuario } from '@/types/auth';
+
+function getErrorStatus(err: unknown): number | undefined {
+  if (typeof err === 'object' && err !== null && 'response' in err) {
+    const response = (err as { response?: unknown }).response;
+    if (typeof response === 'object' && response !== null && 'status' in response) {
+      const status = (response as { status?: unknown }).status;
+      return typeof status === 'number' ? status : undefined;
+    }
+  }
+  return undefined;
+}
 
 export const DevToolbar: React.FC = () => {
-  const { user, loginAs, logout } = useAuth();
+  const { user, logout } = useAuth();
   const simulator = useOptionalSimulator();
+  const queryClient = useQueryClient();
+  const loginMutation = useLoginMutation();
   const [isOpen, setIsOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // If inside simulated phone iframe, hide dev toolbar
   if (simulator?.isInsideIframe) {
@@ -16,25 +37,57 @@ export const DevToolbar: React.FC = () => {
   }
 
   const handleSelectRole = (role: RolUsuario | 'public'): void => {
+    if (loginMutation.isPending) {
+      return;
+    }
+
+    setErrorMessage(null);
+
     if (role === 'public') {
       logout();
+      queryClient.clear();
+      setIsOpen(false);
       router.navigate('/login');
-    } else {
-      loginAs(role);
-      if (role === 'recepcion') {
-        router.navigate('/recepcion/agenda');
-      } else if (role === 'odontologo') {
-        router.navigate('/odontologo/agenda');
-      } else if (role === 'paciente') {
-        router.navigate('/paciente/disponibilidad');
-      }
+      return;
     }
-    setIsOpen(false);
+
+    const account = getDemoAccountByRole(role);
+    if (!account) {
+      return;
+    }
+
+    const password = getDemoPassword(account.identificador, account.password);
+
+    loginMutation.mutate(
+      {
+        payload: {
+          identificador: account.identificador,
+          password,
+        },
+        remember: true,
+      },
+      {
+        onSuccess: (data) => {
+          queryClient.clear();
+          setIsOpen(false);
+          router.navigate(getDefaultRouteForUser(data));
+        },
+        onError: (err: unknown) => {
+          const status = getErrorStatus(err);
+          if (status === 401) {
+            clearDemoPasswordOverride(account.identificador);
+            setErrorMessage('Credenciales demo inválidas. Reintente con la contraseña por defecto.');
+          } else {
+            setErrorMessage('No se pudo iniciar sesión con la cuenta demo.');
+          }
+        },
+      }
+    );
   };
 
   return (
     <aside
-      aria-label="Simulador de roles para desarrollo"
+      aria-label="Selector rápido de rol"
       className="fixed bottom-20 md:bottom-5 right-3 md:right-4 z-50 flex flex-col items-end"
     >
       {/* Expanded Popover Card */}
@@ -45,7 +98,7 @@ export const DevToolbar: React.FC = () => {
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-zinc-800">
             <div className="flex items-center space-x-1.5">
               <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-              <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">Simulador C-11:</span>
+              <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">Cambio rápido de rol:</span>
             </div>
             <button
               type="button"
@@ -57,11 +110,21 @@ export const DevToolbar: React.FC = () => {
             </button>
           </div>
 
+          {errorMessage && (
+            <p
+              role="alert"
+              className="mb-2 rounded-lg bg-red-50 dark:bg-red-950/40 px-2.5 py-1.5 text-[11px] text-red-700 dark:text-red-300"
+            >
+              {errorMessage}
+            </p>
+          )}
+
           <div className="flex flex-col space-y-1.5">
             <button
               type="button"
+              disabled={loginMutation.isPending}
               onClick={() => handleSelectRole('public')}
-              className={`flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all active:scale-[0.98] ${
+              className={`flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${
                 user === null
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-200 hover:bg-slate-200 dark:hover:bg-zinc-700'
@@ -72,8 +135,9 @@ export const DevToolbar: React.FC = () => {
             </button>
             <button
               type="button"
+              disabled={loginMutation.isPending}
               onClick={() => handleSelectRole('recepcion')}
-              className={`flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all active:scale-[0.98] ${
+              className={`flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${
                 user?.rol === 'recepcion'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-200 hover:bg-slate-200 dark:hover:bg-zinc-700'
@@ -84,8 +148,9 @@ export const DevToolbar: React.FC = () => {
             </button>
             <button
               type="button"
+              disabled={loginMutation.isPending}
               onClick={() => handleSelectRole('odontologo')}
-              className={`flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all active:scale-[0.98] ${
+              className={`flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${
                 user?.rol === 'odontologo'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-200 hover:bg-slate-200 dark:hover:bg-zinc-700'
@@ -96,8 +161,9 @@ export const DevToolbar: React.FC = () => {
             </button>
             <button
               type="button"
+              disabled={loginMutation.isPending}
               onClick={() => handleSelectRole('paciente')}
-              className={`flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all active:scale-[0.98] ${
+              className={`flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${
                 user?.rol === 'paciente'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-200 hover:bg-slate-200 dark:hover:bg-zinc-700'
