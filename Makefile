@@ -30,8 +30,8 @@ logs:
 
 # Run pytest suite inside api container
 test:
-	@echo "Running pytest suite for C-06-appointment-request..."
-	docker compose exec api python -m pytest app/api/test_appointment.py -v
+	@echo "Running pytest suite..."
+	docker compose exec api pytest -v
 	@echo "Tests complete."
 
 # Stop containers and remove volumes

@@ -14,14 +14,15 @@ Sistema de gestión de turnos y agenda de pacientes para consultorios odontológ
   * Andrés Víctor Novello
   * Máximo Franco
 * **Fecha:** Noviembre de 2026
+* **Despliegue:** [https://turnos.maximofranco.me/](https://turnos.maximofranco.me/)
 
 ---
 
 ## 📌 Estado del Proyecto y Alcance Alcanzado (TPI)
 
-El proyecto cuenta con **20 changes completados, verificados y archivados (100% del roadmap)** bajo estricto ciclo SDD (superando ampliamente el mínimo de 6 changes exigidos para 3 integrantes), cubriendo la totalidad del camino crítico de Backend, Frontend, DevOps y Testing:
+El proyecto cuenta con **22 changes completados, verificados y archivados (100% del roadmap)** bajo estricto ciclo SDD (superando ampliamente el mínimo de 6 changes exigidos para 3 integrantes), cubriendo la totalidad del camino crítico de Backend, Frontend, DevOps y Testing:
 
-### ✅ Changes Completados y Archivados (20)
+### ✅ Changes Completados y Archivados (22)
 * **`C-01` foundation-setup**: Estructura en capas, Docker Compose, Alembic y baseline.
 * **`C-02` core-models**: Modelos SQLAlchemy (Usuario, Rol, Turno, Estado, Plantilla) y migraciones.
 * **`C-03` auth-jwt**: Autenticación con JWT propio, RBAC y control de acceso.
@@ -42,8 +43,10 @@ El proyecto cuenta con **20 changes completados, verificados y archivados (100% 
 * **`C-18` testing-core**: Pipeline de CI en GitHub Actions (.github/workflows/ci.yml), suite E2E multirol y validación de contratos OpenAPI.
 * **`C-19` ui-dark-mode-theme**: Motor de temas accesible (Dark Zinc/Carbon puro, tokens semánticos y switch cápsula).
 * **`C-20` ui-responsive-accessibility**: Navegación flotante glassmórfica estilo Dynamic Island en desktop, dock inferior táctil en mobile (WCAG 2.5.5) y login clínico modernizado.
+* **`C-21` calendar-and-integration-fixes**: Catálogo público de odontólogos (`GET /api/odontologos`), vista de calendario mensual del odontólogo (`/odontologo/calendario`), `.dockerignore` y reinicio de secuencias en seed.
+* **`C-22` odontologo-calendario-dots**: Resumen mensual de actividad (`GET /api/mis-turnos/calendario`), indicadores visuales (dots) por estado en el calendario del odontólogo y script `scripts/seed_calendar_demo.py`.
 
-> 🚀 **Roadmap 100% completado**: No quedan changes pendientes. El sistema cuenta con la totalidad de sus 20 changes implementados, testeados y archivados.
+> 🚀 **Roadmap 100% completado**: No quedan changes pendientes. El sistema cuenta con la totalidad de sus 22 changes implementados, testeados y archivados.
 
 ---
 
@@ -74,7 +77,24 @@ El proyecto cuenta con **20 changes completados, verificados y archivados (100% 
 
 ## 🏃 Puesta en Marcha (Arranque del Sistema)
 
-### Opción A: Levantar con Docker Compose (Recomendada)
+### Opción A: Stack completo en Docker (`docker-compose.prod.yml`, Frontend en puerto `8080`)
+
+1. **Construir y levantar PostgreSQL, API y Frontend (Nginx):**
+   ```bash
+   docker compose -f docker-compose.prod.yml up -d --build
+   ```
+   *El frontend queda servido dentro del contenedor Nginx en **`http://localhost:8080`** con proxy interno hacia `/api`.*
+
+2. **Poblar datos iniciales (y turnos opcionales del calendario `C-22`):**
+   ```bash
+   docker compose -f docker-compose.prod.yml exec api python -m scripts.seed
+   # Opcional: poblar turnos adicionales del calendario mensual (C-22):
+   docker compose -f docker-compose.prod.yml exec api python -m scripts.seed_calendar_demo
+   ```
+
+---
+
+### Opción B: Desarrollo híbrido (`docker-compose.yml` + Vite en puerto `5173`)
 
 1. **Iniciar la base de datos PostgreSQL y la API FastAPI:**
    ```bash
@@ -82,7 +102,7 @@ El proyecto cuenta con **20 changes completados, verificados y archivados (100% 
    ```
    *Esto levanta PostgreSQL 16 y la API de FastAPI. Las migraciones de base de datos se ejecutan automáticamente en el arranque vía Alembic.*
 
-2. **Iniciar el Frontend (React + Vite):**
+2. **Iniciar el Frontend (React + Vite) con hot-reload:**
    ```bash
    cd frontend
    npm install
@@ -90,18 +110,9 @@ El proyecto cuenta con **20 changes completados, verificados y archivados (100% 
    ```
    *La aplicación web estará disponible en:* **`http://localhost:5173`**
 
-3. **Poblado opcional de turnos adicionales para el calendario (`C-22`):**
-   ```bash
-   # Con docker-compose.prod.yml levantado (sin borrar volúmenes al usar `docker compose -f docker-compose.prod.yml down`):
-   docker compose -f docker-compose.prod.yml exec api python -m scripts.seed_calendar_demo
-   # O en ejecución local dentro de backend/:
-   python -m scripts.seed_calendar_demo
-   ```
-   *(Es idempotente y agrega 7 turnos sintéticos distribuidos en 4 días hábiles del mes actual sin alterar `scripts.seed`.)*
-
 ---
 
-### Opción B: Ejecución Local de Backend sin Docker
+### Opción C: Ejecución Local de Backend sin Docker
 
 Si se dispone de PostgreSQL local en el puerto 5432:
 ```bash
@@ -123,7 +134,9 @@ uvicorn app.api.main:app --reload --host 0.0.0.0 --port 8000
 
 | Servicio / Vista | URL | Descripción |
 | :--- | :--- | :--- |
-| **Frontend Web** | [`http://localhost:5173`](http://localhost:5173) | Portal interactivo con portales de Recepción, Odontólogo y Paciente. |
+| **Producción (Web + API)** | [`https://turnos.maximofranco.me/`](https://turnos.maximofranco.me/) | Despliegue productivo en vivo (Frontend + API + PostgreSQL). |
+| **Frontend Docker (`prod`)** | [`http://localhost:8080`](http://localhost:8080) | Contenedor Nginx sirviendo el bundle estático y proxy hacia `/api`. |
+| **Frontend Web (Local)** | [`http://localhost:5173`](http://localhost:5173) | Portal interactivo en modo desarrollo con Vite. |
 | **Swagger UI (API Docs)** | [`http://localhost:8000/docs`](http://localhost:8000/docs) | Documentación interactiva OpenAPI con endpoints para pruebas directas. |
 | **ReDoc** | [`http://localhost:8000/redoc`](http://localhost:8000/redoc) | Especificación técnica detallada de contratos REST. |
 | **Healthcheck API** | [`http://localhost:8000/health/ready`](http://localhost:8000/health/ready) | Verificación de disponibilidad de API y conexión a base de datos. |
@@ -134,7 +147,7 @@ uvicorn app.api.main:app --reload --host 0.0.0.0 --port 8000
 
 > 🔒 **Regla Dura #12 (Privacidad):** Todos los datos almacenados en el sistema son 100% sintéticos y ficticios.
 
-La pantalla de inicio de sesión (`/login`) cuenta con botones de **Acceso Rápido de Demostración (1-click)** que autocompletan las credenciales reales de la base de datos:
+La pantalla de inicio de sesión (`/login`) cuenta con botones de **Acceso Rápido de Demostración (1-click)** que autocompletan las credenciales reales de la base de datos. Además, el selector flotante inferior derecho (**Cambio rápido de rol**) ejecuta login real automático contra la API usando estas cuentas y sincroniza automáticamente la contraseña en `localStorage` cuando Recepción actualiza su clave inicial:
 
 | Rol | Correo / Identificador | Contraseña | Vistas y Funcionalidades |
 | :--- | :--- | :--- | :--- |
@@ -153,7 +166,7 @@ El proyecto fue desarrollado bajo estricto **Test-Driven Development (TDD)** con
 cd frontend
 npm test -- --run
 ```
-* **Resultado:** **26 archivos de prueba y 120/120 tests pasando en verde (100% de éxito)**.
+* **Resultado:** **28 archivos de prueba y 136/136 tests pasando en verde (100% de éxito)**.
 * Comprobación de tipos y build de producción:
   ```bash
   npm run build
@@ -167,7 +180,7 @@ docker compose exec api pytest
 # O localmente con el entorno virtual activo:
 python -m pytest backend/tests
 ```
-* **Cobertura:** 17 archivos de prueba cubriendo restricciones de no-solapamiento horario (`CB-01` a `CB-06`), autenticación JWT, RBAC, máquina de estados y repositorios.
+* **Cobertura:** 23 archivos de prueba cubriendo restricciones de no-solapamiento horario (`CB-01` a `CB-06`), autenticación JWT, RBAC, máquina de estados y repositorios.
 
 ---
 
@@ -209,9 +222,10 @@ turnos-odontologia/
 ├── .atl/skill-registry.md         # Registro formal de skills del proyecto
 ├── AGENTS.md                      # Reglas de gobierno para agentes IA
 ├── CLAUDE.md                      # Espejo sincronizado de AGENTS.md
-├── CHANGES.md                     # Roadmap operacional con 20 changes completados (100% del roadmap)
+├── CHANGES.md                     # Roadmap operacional base del proyecto (C-01 a C-20)
 ├── mcp_config.example.json        # Configuración de ejemplo sin secretos para MCP Playwright
 ├── docker-compose.yml             # Orquestación de servicios (api, postgres)
+├── docker-compose.prod.yml        # Orquestación de producción (frontend Nginx, api, postgres)
 ├── backend/                       # Backend FastAPI + SQLAlchemy 2.0 async + Alembic
 │   ├── app/                       # Capas domain, application, infrastructure y api
 │   ├── alembic/                   # Migraciones de base de datos PostgreSQL
@@ -225,5 +239,5 @@ turnos-odontologia/
 ├── knowledge-base/                # Base de conocimiento fundacional (10 archivos canónicos)
 └── openspec/                      # Especificaciones canónicas y changes SDD archivados
     ├── specs/                     # 25 especificaciones principales sincronizadas
-    └── changes/archive/           # 20 changes completados y archivados bajo ciclo SDD
+    └── changes/archive/           # 22 changes completados y archivados bajo ciclo SDD
 ```
